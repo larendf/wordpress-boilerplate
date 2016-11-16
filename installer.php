@@ -96,19 +96,19 @@ $GLOBALS['REPLACE_LIST']
   ================================================================================================= */
 
 //COMPARE VALUES
-$GLOBALS['FW_CREATED']		= '2016-11-16 05:57:36';
+$GLOBALS['FW_CREATED']		= '2016-11-16 07:39:30';
 $GLOBALS['FW_VERSION_DUP']	= '1.1.20';
 $GLOBALS['FW_VERSION_WP']	= '4.6.1';
-$GLOBALS['FW_VERSION_DB']	= '10.1.10';
-$GLOBALS['FW_VERSION_PHP']	= '5.6.19';
-$GLOBALS['FW_VERSION_OS']	= 'Darwin';
+$GLOBALS['FW_VERSION_DB']	= '5.6.32';
+$GLOBALS['FW_VERSION_PHP']	= '5.4.43';
+$GLOBALS['FW_VERSION_OS']	= 'Linux';
 //GENERAL
 $GLOBALS['FW_TABLEPREFIX'] = '_';
-$GLOBALS['FW_URL_OLD'] = 'http://localhost/wp/personalize';
+$GLOBALS['FW_URL_OLD'] = 'http://demo.larendf.com/hirosawa';
 $GLOBALS['FW_URL_NEW'] = '';
-$GLOBALS['FW_PACKAGE_NAME'] = '20161116_personalize_582bf5503e7d09339161116055736_archive.zip';
+$GLOBALS['FW_PACKAGE_NAME'] = '20160418_hirosawa_582c0d32526282574161116073930_archive.zip';
 $GLOBALS['FW_PACKAGE_NOTES'] = '';
-$GLOBALS['FW_SECURE_NAME'] = '20161116_personalize_582bf5503e7d09339161116055736';
+$GLOBALS['FW_SECURE_NAME'] = '20160418_hirosawa_582c0d32526282574161116073930';
 $GLOBALS['FW_DBHOST'] = '';
 $GLOBALS['FW_DBHOST'] = empty($GLOBALS['FW_DBHOST']) ? 'localhost' : $GLOBALS['FW_DBHOST'];
 $GLOBALS['FW_DBPORT'] = '';
@@ -120,8 +120,8 @@ $GLOBALS['FW_SSL_ADMIN'] = 0;
 $GLOBALS['FW_SSL_LOGIN'] = 0;
 $GLOBALS['FW_CACHE_WP'] = 0;
 $GLOBALS['FW_CACHE_PATH'] = 0;
-$GLOBALS['FW_BLOGNAME'] = 'Personalize';
-$GLOBALS['FW_WPROOT'] = '/Applications/XAMPP/xamppfiles/htdocs/wp/personalize/';
+$GLOBALS['FW_BLOGNAME'] = 'Hirosawa';
+$GLOBALS['FW_WPROOT'] = '/home3/larendfc/public_html/demo/hirosawa/';
 $GLOBALS['FW_DUPLICATOR_VERSION'] = '1.1.20';
 $GLOBALS['FW_OPTS_DELETE'] = json_decode('["duplicator_ui_view_state","duplicator_package_active","duplicator_settings"]', true);
 
