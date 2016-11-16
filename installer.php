@@ -1,6 +1,6 @@
 <?php
 /*
-  Copyright 2011-12 Cory Lamle  lifeinthegrid.com
+  Copyright 2011-16  lifeinthegrid.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License, version 2, as
@@ -87,9 +87,6 @@ if (file_exists('dtoken.php')) {
 /* ==============================================================================================
 ADVANCED FEATURES - Allows admins to perform aditional logic on the import.
 
-$GLOBALS['TABLES_SKIP_COLS']
-	Add Known column names of tables you don't want the search and replace logic to run on.
-
 $GLOBALS['REPLACE_LIST']
 	Add additional search and replace items to step 2 for the serialize engine.  
 	Place directly below $GLOBALS['REPLACE_LIST'] variable below your items
@@ -98,12 +95,20 @@ $GLOBALS['REPLACE_LIST']
 		array_push($GLOBALS['REPLACE_LIST'], array('search' => 'ftps://oldurl/',   'replace' => 'ftps://newurl/'));
   ================================================================================================= */
 
+//COMPARE VALUES
+$GLOBALS['FW_CREATED']		= '2016-11-16 05:57:36';
+$GLOBALS['FW_VERSION_DUP']	= '1.1.20';
+$GLOBALS['FW_VERSION_WP']	= '4.6.1';
+$GLOBALS['FW_VERSION_DB']	= '10.1.10';
+$GLOBALS['FW_VERSION_PHP']	= '5.6.19';
+$GLOBALS['FW_VERSION_OS']	= 'Darwin';
+//GENERAL
 $GLOBALS['FW_TABLEPREFIX'] = '_';
-$GLOBALS['FW_URL_OLD'] = 'http://personalize.larendf.com';
+$GLOBALS['FW_URL_OLD'] = 'http://localhost/wp/personalize';
 $GLOBALS['FW_URL_NEW'] = '';
-$GLOBALS['FW_PACKAGE_NAME'] = '20151207_personalize_566548ae57ef21340151207085158_archive.zip';
+$GLOBALS['FW_PACKAGE_NAME'] = '20161116_personalize_582bf5503e7d09339161116055736_archive.zip';
 $GLOBALS['FW_PACKAGE_NOTES'] = '';
-$GLOBALS['FW_SECURE_NAME'] = '20151207_personalize_566548ae57ef21340151207085158';
+$GLOBALS['FW_SECURE_NAME'] = '20161116_personalize_582bf5503e7d09339161116055736';
 $GLOBALS['FW_DBHOST'] = '';
 $GLOBALS['FW_DBHOST'] = empty($GLOBALS['FW_DBHOST']) ? 'localhost' : $GLOBALS['FW_DBHOST'];
 $GLOBALS['FW_DBPORT'] = '';
@@ -116,8 +121,8 @@ $GLOBALS['FW_SSL_LOGIN'] = 0;
 $GLOBALS['FW_CACHE_WP'] = 0;
 $GLOBALS['FW_CACHE_PATH'] = 0;
 $GLOBALS['FW_BLOGNAME'] = 'Personalize';
-$GLOBALS['FW_WPROOT'] = '/home3/larendfc/public_html/personalize/';
-$GLOBALS['FW_DUPLICATOR_VERSION'] = '0.5.34';
+$GLOBALS['FW_WPROOT'] = '/Applications/XAMPP/xamppfiles/htdocs/wp/personalize/';
+$GLOBALS['FW_DUPLICATOR_VERSION'] = '1.1.20';
 $GLOBALS['FW_OPTS_DELETE'] = json_decode('["duplicator_ui_view_state","duplicator_package_active","duplicator_settings"]', true);
 
 //DATABASE SETUP: all time in seconds	
@@ -126,7 +131,7 @@ $GLOBALS['DB_MAX_PACKETS'] = 268435456;
 ini_set('mysql.connect_timeout', '5000');
 
 //PHP SETUP: all time in seconds
-ini_set('memory_limit', '5000M');
+ini_set('memory_limit', '2048M');
 ini_set("max_execution_time", '5000');
 ini_set("max_input_time", '5000');
 ini_set('default_socket_timeout', '5000');
@@ -136,7 +141,6 @@ $GLOBALS['DBCHARSET_DEFAULT'] = 'utf8';
 $GLOBALS['DBCOLLATE_DEFAULT'] = 'utf8_general_ci';
 
 //UPDATE TABLE SETTINGS
-$GLOBALS['TABLES_SKIP_COLS'] = array('');
 $GLOBALS['REPLACE_LIST'] = array();
 
 
@@ -186,19 +190,18 @@ if ($_POST['action_step'] == 1) {
 <?php
 // Exit if accessed directly
 if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
 	header("Location: $_baseURL");
 	exit; 
 }
 
 define('ERR_CONFIG_FOUND',		'A wp-config.php already exists in this location.  This error prevents users from accidentally overwriting the wrong directories contents.  You have two options: <ul><li>Empty this root directory except for the package and installer and try again.</li><li>Delete just the wp-config.php file and try again.  This will over-write all other files in the directory.</li></ul>');
-define('ERR_ZIPNOTFOUND',		'The packaged zip file was not found. Be sure the zip package is in the same directory as the installer file.  If you are trying to reinstall a package you can copy the package from the "' . DUPLICATOR_SSDIR_NAME . '" directory back up to your root which is the same location as your installer.php file.');
+define('ERR_ZIPNOTFOUND',		'The packaged zip file was not found. Be sure the zip package is in the same directory as the installer file and as the correct permissions.  If you are trying to reinstall a package you can copy the package from the "' . DUPLICATOR_SSDIR_NAME . '" directory back up to your root which is the same location as your installer.php file.');
 define('ERR_ZIPOPEN',			'Failed to open zip archive file. Please be sure the archive is completely downloaded before running the installer. Try to extract the archive manually to make sure the file is not corrupted.');
 define('ERR_ZIPEXTRACTION',		'Errors extracting zip file.  Portions or part of the zip archive did not extract correctly.    Try to extract the archive manually with a client side program like unzip/win-zip/winrar to make sure the file is not corrupted.  If the file extracts correctly then there is an invalid file or directory that PHP is unable to extract.  This can happen if your moving from one operating system to another where certain naming conventions work on one environment and not another. <br/><br/> Workarounds: <br/> 1. Create a new package and be sure to exclude any directories that have invalid names or files in them.   This warning will be displayed on the scan results under "Invalid Names". <br/> 2. Manually extract the zip file with a client side program.  Then under advanced options in step 1 of the installer check the "Manual package extraction" option and perform the install.');
 define('ERR_ZIPMANUAL',			'When choosing manual package extraction, the contents of the package must already be extracted and the wp-config.php and database.sql files must be present in the same directory as the installer.php for the process to continue.  Please manually extract the package into the current directory before continuing in manual extraction mode.  Also validate that the wp-config.php and database.sql files are present.');
-define('ERR_MAKELOG',			'PHP is having issues writing to the log file <b>' . DupUtil::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']) . '\installer-log.txt .</b> In order for the Duplicator to proceed validate your owner/group and permission settings for PHP on this path. Try temporarily setting you permissions to 777 to see if the issue gets resolved.  If you are on a shared hosting environment please contact your hosting company and tell them you are getting errors writing files to the path above when using PHP.');
+define('ERR_MAKELOG',			'PHP is having issues writing to the log file <b>' . DUPX_Util::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']) . '\installer-log.txt .</b> In order for the Duplicator to proceed validate your owner/group and permission settings for PHP on this path. Try temporarily setting you permissions to 777 to see if the issue gets resolved.  If you are on a shared hosting environment please contact your hosting company and tell them you are getting errors writing files to the path above when using PHP.');
 define('ERR_ZIPARCHIVE',		'In order to extract the archive.zip file the PHP ZipArchive module must be installed.  Please read the FAQ for more details.  You can still install this package but you will need to check the Manual package extraction checkbox found in the Advanced Options.  Please read the online user guide for details in performing a manual package extraction.');
 define('ERR_MYSQLI_SUPPORT',	'In order to complete an install the mysqli extension for PHP is required. If you are on a hosted server please contact your host and request that mysqli be enabled.  For more information visit: http://php.net/manual/en/mysqli.installation.php');
 define('ERR_DBCONNECT',			'DATABASE CONNECTION FAILED!<br/>');
@@ -206,6 +209,8 @@ define('ERR_DBCONNECT_CREATE',  'DATABASE CREATION FAILURE!<br/> Unable to creat
 define('ERR_DBTRYCLEAN',		'DATABASE CREATION FAILURE!<br/> Unable to remove all tables from database "%s".<br/>  Please remove all tables from this database and try the installation again.');
 define('ERR_DBCREATE',			'The database "%s" does not exists.<br/>  Change mode to create in order to create a new database.');
 define('ERR_DBEMPTY',			'The database "%s" has "%s" tables.  The Duplicator only works with an EMPTY database.  Enable the action "Connect and Remove All Data" radio button to remove all tables and or create a new database. Some hosting providers do not allow table removal from scripts.  In this case you will need to login to your hosting providers control panel and remove the tables manually.  Please contact your hosting provider for further details.  Always backup all your data before proceeding!');
+define('ERR_TESTDB_UTF8',		'UTF8 Characters were detected as part of the database connection string. If your connection fails be sure  to update the MySQL my.ini configuration file setting to support UTF8 characters by enabling this option [character_set_server=utf8] and restarting the database server.');
+define('ERR_TESTDB_VERSION',	'In order to avoid database incompatibility issues make sure the database versions between the build and installer servers are as close as possible. If the package was created on a newer database version than where it is being installed then you might run into issues.<br/><br/> It is best to make sure the server where the installer is running has the same or higher version number than where it was built.  If the major and minor version are the same or close for example [5.7 to 5.6], then the migration should work without issues.  A version pair of [5.7 to 5.1] is more likely to cause issues unless you have a very simple setup.  If the versions are too far apart work with your hosting provider to upgrade the MySQL engine on this server.');
 
 /** * *****************************************************
  * DUPX_Log  
@@ -240,28 +245,25 @@ class DUPX_Log {
 <?php
 // Exit if accessed directly
 if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
 	header("Location: $_baseURL");
 	exit; 
 }
 
 /** * *****************************************************
- *  CLASS::DupUtil
  *  Various Static Utility methods for working with the installer */
-class DupUtil {
+class DUPX_Util 
+{
 
-
-
-    /** METHOD: GET_MICROTIME
+    /** 
      * Get current microtime as a float. Can be used for simple profiling.
      */
     static public function get_microtime() {
         return microtime(true);
     }
 
-    /** METHOD: ELAPSED_TIME
+    /** 
      * Return a string with the elapsed time.
      * Order of $end and $start can be switched. 
      */
@@ -269,7 +271,7 @@ class DupUtil {
         return sprintf("%.4f sec.", abs($end - $start));
     }
 
-    /** METHOD: ESC_HTML_ATTR
+    /** 
      * @param string $string Thing that needs escaping
      * @param bool $echo   Do we echo or return?
      * @return string    Escaped string. 
@@ -282,7 +284,7 @@ class DupUtil {
             return $output;
     }
 
-    /** METHOD: TABLE_COUNT
+    /** 
      *  Count the tables in a given database
      *  @param string $_POST['dbname']		Database to count tables in 
      */
@@ -292,7 +294,7 @@ class DupUtil {
         return is_null($row) ? 0 : $row[0];
     }
 
-    /** METHOD: TABLE_ROW_COUNT
+    /** 
      *  Returns the table count
      *  @param string $conn	        A valid link resource
      *  @param string $table_name	A valid table name
@@ -307,7 +309,7 @@ class DupUtil {
         }
     }
 
-    /** METHOD: ADD_ENDING_SLASH
+    /** 
      *  Adds a slash to the end of a path
      *  @param string $path		A path
      */
@@ -319,7 +321,7 @@ class DupUtil {
         return $path;
     }
 
-    /** METHOD: SET_SAFE_PATH
+    /** 
      *  Makes path safe for any OS
      *  Paths should ALWAYS READ be "/"
      * 		uni: /home/path/file.xt
@@ -334,7 +336,7 @@ class DupUtil {
         return str_replace("/", "\\", $path);
     }
 
-    /** METHOD: FCGI_FLUSH
+    /** 
      *  PHP_SAPI for fcgi requires a data flush of at least 256
      *  bytes every 40 seconds or else it forces a script hault
      */
@@ -343,7 +345,7 @@ class DupUtil {
         @flush();
     }
 
-    /** METHOD: COPY_FILE
+    /** 
      *  A safe method used to copy larger files
      *  @param string $source		The path to the file being copied
      *  @param string $destination	The path to the file being made
@@ -361,18 +363,19 @@ class DupUtil {
         fclose($sp);
     }
 
-    /** METHOD: string_has_value
-     *  Finds a string in a file and returns true if found
+    /** 
+     *  Looks for a list of strings in a string and returns each list item that is found
      *  @param array  $list		A list of strings to search for
      *  @param string $haystack	The string to search in
      */
-    static public function string_has_value($list, $file) {
+    static public function search_list_values($list, $haystack) {
+		$found = array();
         foreach ($list as $var) {
-            if (strstr($file, $var) !== false) {
-                return true;
+            if (strstr($haystack, $var) !== false) {
+				array_push($found, $var);
             }
         }
-        return false;
+        return $found;
     }
 
     /** METHOD: get_active_plugins
@@ -392,7 +395,7 @@ class DupUtil {
         return array();
     }
 
-    /** METHOD: get_database_tables
+    /** 
      *  Returns the tables for a database
      *  @param  conn   $dbh	 A database connection handle	 
      *  @return array  $list A list of all table names
@@ -403,7 +406,7 @@ class DupUtil {
             while ($table = @mysqli_fetch_array($query)) {
                 $all_tables[] = $table[0];
             }
-            if (is_array($all_tables)) {
+            if (isset($all_tables) && is_array($all_tables)) {
                 return $all_tables;
             }
         }
@@ -500,7 +503,6 @@ class DupUtil {
     }
 
     /**
-     *  READABLE_BYTESIZE
      *  Display human readable byte sizes
      *  @param string $size		The size in bytes
      */
@@ -516,7 +518,6 @@ class DupUtil {
     }
 	
 	/**
-     *  PREG_REPLACEMENT_QUOTE
      *  The characters that are special in the replacement value of preg_replace are not the 
 	 *  same characters that are special in the pattern
      *  @param string $str		The string to replace on
@@ -527,49 +528,200 @@ class DupUtil {
 	
 	
 	/**
-     *  IS_WEB_CONNECTED
      *  Check to see if the internet is accessable
+	 *  NOTE: fsocketopen on windows doesn't seem to honor $timeout setting.
+	 * 
 	 *  @param string $url		A url e.g without prefix "ajax.googleapis.com"
 	 *  @param string $port		A valid port number
 	 *  @return bool
      */
-	static public function is_url_active($url, $port) {
-		if (function_exists('fsockopen')) {
+	public static function is_url_active($url, $port, $timeout=5) 
+	{
+		if (function_exists('fsockopen')) 
+		{
+			@ini_set("default_socket_timeout", 5);
 			$port = isset($port) && is_integer($port) ? $port : 80;
-			$connected = @fsockopen($url, $port); //website and port
+			$connected = @fsockopen($url, $port, $errno, $errstr, $timeout); //website and port
 			if ($connected){
-				$is_conn = true;
 				@fclose($connected);
-			} else {
-				$is_conn = false; 
-			}
-			return $is_conn;
+				return true;
+			} 
+			return false;
 		} else {
 			return false;
 		}
 	}
 	
+	/**
+     *  Returns an array of zip files found in the current directory
+	 *  @return array of zip files
+     */
+	static public function get_zip_files() {
+		
+		$files = array();
+		foreach (glob("*.zip") as $name) {
+			if (file_exists($name)) {
+				$files[] = $name;
+			}
+		}
+		
+		if (count($files) > 0) {
+			return $files;
+		}
+		
+		//FALL BACK: Windows XP has bug with glob, 
+		//add secondary check for PHP lameness
+		if ($dh = opendir('.')) 
+		{
+			while (false !== ($name = readdir($dh))) {
+				$ext = substr($name, strrpos($name, '.') + 1);
+				if(in_array($ext, array("zip"))) {
+					$files[] = $name;
+				}
+			}
+			closedir($dh);
+		}
+		
+		return $files;
+	}
 	
+	/**
+	*  Does a string have non ascii characters
+	*/
+	public static function is_non_ascii($string)
+    {
+		return preg_match('/[^\x20-\x7f]/', $string);
+    }
+}
+?>
+
+<?php
+// Exit if accessed directly
+if (!defined('DUPLICATOR_INIT')) {
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
+	header("HTTP/1.1 301 Moved Permanently");
+	header("Location: {$_baseURL}");
+	exit;
+}
+
+/** 
+ * Class used to update and edit and update the wp-config.php */
+class DUPX_WPConfig
+{
+	/** 
+	 * Updates the web server config files in Step 1  */
+    public static function UpdateStep1() 
+	{
+		if (! file_exists('wp-config.php'))	
+			return;
+				
+		$root_path	= DUPX_Util::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
+		$wpconfig   = @file_get_contents('wp-config.php', true);
+
+		$patterns = array(
+			"/'DB_NAME',\s*'.*?'/",
+			"/'DB_USER',\s*'.*?'/",
+			"/'DB_PASSWORD',\s*'.*?'/",
+			"/'DB_HOST',\s*'.*?'/");
+
+		$db_host = ($_POST['dbport'] == 3306) ? $_POST['dbhost'] : "{$_POST['dbhost']}:{$_POST['dbport']}";
+
+		$replace = array(
+			"'DB_NAME', "	  . '\'' . $_POST['dbname']				. '\'',
+			"'DB_USER', "	  . '\'' . $_POST['dbuser']				. '\'',
+			"'DB_PASSWORD', " . '\'' . DUPX_Util::preg_replacement_quote($_POST['dbpass']) . '\'',
+			"'DB_HOST', "	  . '\'' . $db_host				. '\'');
+
+		//SSL CHECKS
+		if ($_POST['ssl_admin']) {
+			if (! strstr($wpconfig, 'FORCE_SSL_ADMIN')) {
+				$wpconfig = $wpconfig . PHP_EOL . "define('FORCE_SSL_ADMIN', true);";
+			}
+		} else {
+			array_push($patterns, "/'FORCE_SSL_ADMIN',\s*true/");
+			array_push($replace,  "'FORCE_SSL_ADMIN', false");
+		}
+
+		if ($_POST['ssl_login']) {
+			if (! strstr($wpconfig, 'FORCE_SSL_LOGIN')) {
+				$wpconfig = $wpconfig . PHP_EOL . "define('FORCE_SSL_LOGIN', true);";
+			}
+		} else {
+			array_push($patterns, "/'FORCE_SSL_LOGIN',\s*true/");
+			array_push($replace, "'FORCE_SSL_LOGIN', false");
+		}
+
+		//CACHE CHECKS
+		if ($_POST['cache_wp']) {
+			if (! strstr($wpconfig, 'WP_CACHE')) {
+				$wpconfig = $wpconfig . PHP_EOL . "define('WP_CACHE', true);";
+			}
+		} else {
+			array_push($patterns, "/'WP_CACHE',\s*true/");
+			array_push($replace,  "'WP_CACHE', false");
+		}
+		if (! $_POST['cache_path']) {
+			array_push($patterns, "/'WPCACHEHOME',\s*'.*?'/");
+			array_push($replace,  "'WPCACHEHOME', ''");
+		}
+
+		if (! is_writable("{$root_path}/wp-config.php") ) 
+		{
+			if (file_exists("{$root_path}/wp-config.php")) 
+			{
+				chmod("{$root_path}/wp-config.php", 0644)
+					? DUPX_Log::Info('File Permission Update: wp-config.php set to 0644')
+					: DUPX_Log::Info('WARNING: Unable to update file permissions and write to wp-config.php.  Please visit the online FAQ for setting file permissions and work with your hosting provider or server administrator to enable this installer.php script to write to the wp-config.php file.');
+			} else {
+				DUPX_Log::Info('WARNING: Unable to locate wp-config.php file.  Be sure the file is present in your archive.');
+			}
+		}
+
+		$wpconfig = preg_replace($patterns, $replace, $wpconfig);
+		file_put_contents('wp-config.php', $wpconfig);
+		$wpconfig = null;
+	}
+	
+	/** 
+	 * Updates the web server config files in Step 2 */
+    public static function UpdateStep2() 
+	{
+		$config_file = '';
+		if (! file_exists('wp-config.php'))	{
+			return $config_file;
+		}
+			
+		$patterns = array("/('|\")WP_HOME.*?\)\s*;/", 
+						  "/('|\")WP_SITEURL.*?\)\s*;/",
+						  "/('|\")DOMAIN_CURRENT_SITE.*?\)\s*;/",
+						  "/('|\")PATH_CURRENT_SITE.*?\)\s*;/");						
+		$replace  = array("'WP_HOME', '{$_POST['url_new']}');",
+						  "'WP_SITEURL', '{$_POST['url_new']}');",
+						  "'DOMAIN_CURRENT_SITE', '{$mu_newDomainHost}');",
+						  "'PATH_CURRENT_SITE', '{$mu_newUrlPath}');");
+						  
+		$config_file = file_get_contents('wp-config.php', true);
+		$config_file = preg_replace($patterns, $replace, $config_file);
+		file_put_contents('wp-config.php', $config_file);
+		
+		return $config_file;
+	}
 }
 ?>
 
 <?php
 // Exit if accessed directly 
 if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
 	header("Location: $_baseURL");
 	exit; 
 }
 
 /** * *****************************************************
- * DUPX_Config 
  * Class used to update and edit web server configuration files  */
-
-class DUPX_Config {
+class DUPX_ServerConfig {
 	
-
     /** 
      *  Clear .htaccess and web.config files and backup
      */
@@ -580,20 +732,24 @@ class DUPX_Config {
 		//Apache
 		@copy('.htaccess', '.htaccess.orig');
 		@unlink('.htaccess');
+		
 		//IIS
 		@copy('web.config', 'web.config.orig');
 		@unlink('web.config');
 
+		//.user.ini - For WordFence
+		@copy('.user.ini', '.user.ini.orig');
+		@unlink('.user.ini');
+		
 		DUPX_Log::Info("- Backup of .htaccess/web.config made to .orig");
 		DUPX_Log::Info("- Reset of .htaccess/web.config files");
 		$tmp_htaccess = '# RESET FOR DUPLICATOR INSTALLER USEAGE';
 		file_put_contents('.htaccess', $tmp_htaccess);
-		@chmod('.htaccess', 0644);
-    }
-	
-	
-	    /** METHOD: ResetHTACCESS
-     *  Resetst the .htaccess file
+		@chmod('.htaccess', 0644);    		
+	}		
+		
+	/** METHOD: ResetHTACCESS
+     *  Resets the .htaccess file
      */
     static public function Setup() {
 		
@@ -604,8 +760,8 @@ class DUPX_Config {
 		DUPX_Log::Info("\nWEB SERVER CONFIGURATION FILE BASIC SETUP:");
 		$currdata = parse_url($_POST['url_old']);
 		$newdata  = parse_url($_POST['url_new']);
-		$currpath = DupUtil::add_slash(isset($currdata['path']) ? $currdata['path'] : "");
-		$newpath  = DupUtil::add_slash(isset($newdata['path'])  ? $newdata['path'] : "");
+		$currpath = DUPX_Util::add_slash(isset($currdata['path']) ? $currdata['path'] : "");
+		$newpath  = DUPX_Util::add_slash(isset($newdata['path'])  ? $newdata['path'] : "");
 
 		$tmp_htaccess = <<<HTACCESS
 # BEGIN WordPress
@@ -633,24 +789,24 @@ HTACCESS;
 
 <?php
 // Exit if accessed directly
-if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+if (!defined('DUPLICATOR_INIT')) {
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
-	header("Location: $_baseURL");
-	exit; 
+	header("Location: {$_baseURL}");
+	exit;
 }
 
 /** * *****************************************************
- * CLASS::DUPDBTEXTSWAP
+ * CLASS::DUPX_UpdateEngine
  * Walks every table in db that then walks every row and column replacing searches with replaces
  * large tables are split into 50k row blocks to save on memory. */
-class DUPX_Serializer {
-
+class DUPX_UpdateEngine 
+{
 	/**
 	 * LOG ERRORS
 	 */
-	static public function log_errors($report) {
+	public static function log_errors($report) 
+	{
 		if (!empty($report['errsql'])) {
 			DUPX_Log::Info("====================================");
 			DUPX_Log::Info("DATA-REPLACE ERRORS (MySQL)");
@@ -680,13 +836,19 @@ class DUPX_Serializer {
 	/**
 	 * LOG STATS
 	 */
-	static public function log_stats($report) {
-		if (!empty($report) && is_array($report)) {
+	public static function log_stats($report) 
+	{
+		if (!empty($report) && is_array($report)) 
+		{
 			$stats  = "--------------------------------------\n";
-			$stats .= sprintf("SEARCH1:\t'%s' \nREPLACE1:\t'%s' \n", $_POST['url_old'], $_POST['url_new']);
-			$stats .= sprintf("SEARCH2:\t'%s' \nREPLACE2:\t'%s' \n", $_POST['path_old'], $_POST['path_new']);
-			$stats .= sprintf("SCANNED:\tTables:%d | Rows:%d | Cells:%d \n", $report['scan_tables'], $report['scan_rows'], $report['scan_cells']);
-			$stats .= sprintf("UPDATED:\tTables:%d | Rows:%d |Cells:%d \n", $report['updt_tables'], $report['updt_rows'], $report['updt_cells']);
+			$srchnum = 0;
+			foreach ($GLOBALS['REPLACE_LIST'] as $item) 
+			{
+				$srchnum++;
+				$stats .= sprintf("Search{$srchnum}:\t'%s' \nChange{$srchnum}:\t'%s' \n", $item['search'], $item['replace']);
+			}
+			$stats .= sprintf("SCANNED:\tTables:%d \t|\t Rows:%d \t|\t Cells:%d \n", $report['scan_tables'], $report['scan_rows'], $report['scan_cells']);
+			$stats .= sprintf("UPDATED:\tTables:%d \t|\t Rows:%d \t|\t Cells:%d \n", $report['updt_tables'], $report['updt_rows'], $report['updt_cells']);
 			$stats .= sprintf("ERRORS:\t\t%d \nRUNTIME:\t%f sec", $report['err_all'], $report['time']);
 			DUPX_Log::Info($stats);
 		}
@@ -695,8 +857,8 @@ class DUPX_Serializer {
 	/**
 	 * Returns only the text type columns of a table ignoring all numeric types
 	 */
-	static public function getTextColumns($conn, $table) {
-	
+	public static function getTextColumns($conn, $table) 
+	{
 		$type_where  = "type NOT LIKE 'tinyint%' AND ";
 		$type_where .= "type NOT LIKE 'smallint%' AND ";
 		$type_where .= "type NOT LIKE 'mediumint%' AND ";
@@ -722,7 +884,8 @@ class DUPX_Serializer {
 		} 
 		
 		//Return Primary which is needed for index lookup
-		$result = mysqli_query($conn, "SHOW INDEX FROM `{$table}` WHERE KEY_NAME LIKE '%PRIMARY%'");
+		//$result = mysqli_query($conn, "SHOW INDEX FROM `{$table}` WHERE KEY_NAME LIKE '%PRIMARY%'"); 1.1.15 updated
+		$result = mysqli_query($conn, "SHOW INDEX FROM `{$table}`");
 		if (mysqli_num_rows($result) > 0) { 
 			while ($row = mysqli_fetch_assoc($result)) { 
 				$fields[] = $row['Column_name']; 
@@ -735,26 +898,38 @@ class DUPX_Serializer {
 	/**
 	 * LOAD
 	 * Begins the processing for replace logic
-	 * @param mysql  $conn 		 The db connection object
-	 * @param array  $list       Key value pair of 'search' and 'replace' arrays
-	 * @param array  $tables     The tables we want to look at.
+	 * @param mysql  $conn			The db connection object
+	 * @param array  $list			Key value pair of 'search' and 'replace' arrays
+	 * @param array  $tables		The tables we want to look at
+	 * @param array  $fullsearch    Search every column reguardless of its data type
 	 * @return array Collection of information gathered during the run.
 	 */
-	static public function load($conn, $list = array(), $tables = array(), $cols = array(), $fullsearch = false) {
-		$exclude_cols = $cols;
-
-		$report = array('scan_tables' => 0, 'scan_rows' => 0, 'scan_cells' => 0,
-			'updt_tables' => 0, 'updt_rows' => 0, 'updt_cells' => 0,
-			'errsql' => array(), 'errser' => array(), 'errkey' => array(),
-			'errsql_sum' => 0, 'errser_sum' => 0, 'errkey_sum' => 0,
-			'time' => '', 'err_all' => 0);
+	public static function load($conn, $list = array(), $tables = array(), $fullsearch = false) 
+	{
+		$report = array(
+			'scan_tables' => 0, 
+			'scan_rows' => 0, 
+			'scan_cells' => 0,
+			'updt_tables' => 0, 
+			'updt_rows' => 0, 
+			'updt_cells' => 0,
+			'errsql' => array(), 
+			'errser' => array(), 
+			'errkey' => array(),
+			'errsql_sum' => 0, 
+			'errser_sum' => 0, 
+			'errkey_sum' => 0,
+			'time' => '', 
+			'err_all' => 0
+		);
 		
 		$walk_function = create_function('&$str', '$str = "`$str`";');
 
-		$profile_start = DupUtil::get_microtime();
+		$profile_start = DUPX_Util::get_microtime();
 		if (is_array($tables) && !empty($tables)) {
 			
-			foreach ($tables as $table) {
+			foreach ($tables as $table) 
+			{
 				$report['scan_tables']++;
 				$columns = array();
 
@@ -782,7 +957,8 @@ class DUPX_Serializer {
 				// they are the only data types that should allow any type of search/replace logic
 				$colList = '*';
 				$colMsg  = '*';
-				if (! $fullsearch) {
+				if (! $fullsearch) 
+				{
 					$colList = self::getTextColumns($conn, $table);
 					if ($colList != null && is_array($colList)) {
 						array_walk($colList, $walk_function);
@@ -791,16 +967,19 @@ class DUPX_Serializer {
 					$colMsg = (empty($colList)) ? '*' : '~';
 				}
 				
-				if (empty($colList)) {
+				if (empty($colList)) 
+				{
 					DUPX_Log::Info("{$table}^ ({$row_count})");
 					continue;
-				} else {
+				} 
+				else 
+				{
 					DUPX_Log::Info("{$table}{$colMsg} ({$row_count})");
 				}
 
 				//Paged Records
-				for ($page = 0; $page < $pages; $page++) {
-
+				for ($page = 0; $page < $pages; $page++) 
+				{
 					$current_row = 0;
 					$start = $page * $page_size;
 					$end   = $start + $page_size;
@@ -812,11 +991,10 @@ class DUPX_Serializer {
 					
 					$scan_count = ($row_count < $end) ? $row_count : $end;
 					DUPX_Log::Info("\tScan => {$start} of {$scan_count}", 2);
-					//DEBUG ONLY:
-					//DUPX_Log::Info("\t{$sql}", 3);
 
 					//Loops every row
-					while ($row = mysqli_fetch_array($data)) {
+					while ($row = mysqli_fetch_array($data)) 
+					{
 						$report['scan_rows']++;
 						$current_row++;
 						$upd_col = array();
@@ -826,43 +1004,59 @@ class DUPX_Serializer {
 						$serial_err = 0;
 
 						//Loops every cell
-						foreach ($columns as $column => $primary_key) {
-							if (in_array($column, $exclude_cols)) {
-								continue;
-							}
-
+						foreach ($columns as $column => $primary_key) 
+						{
 							$report['scan_cells']++;
 							$edited_data = $data_to_fix = $row[$column];
 							$base64coverted = false;
+							$txt_found = false;
 
 							//Only replacing string values
-							if (!empty($row[$column]) && !is_numeric($row[$column])) {
-
+							if (!empty($row[$column]) && !is_numeric($row[$column])) 
+							{
 								//Base 64 detection
-								if (base64_decode($row[$column], true)) {
+								if (base64_decode($row[$column], true)) 
+								{
 									$decoded = base64_decode($row[$column], true);
-									if (self::is_serialized($decoded)) {
+									if (self::is_serialized($decoded)) 
+									{
 										$edited_data = $decoded;
 										$base64coverted = true;
 									}
 								}
+								
+								//Skip table cell if match not found
+								foreach ($list as $item) 
+								{
+									if (strpos($edited_data, $item['search']) !== false) {
+										$txt_found = true;
+										break;
+									}
+								}
+								if (! $txt_found) {
+									continue;
+								}
 
-								//Replace logic - level 1: simple check on basic serilized strings
+								//Replace logic - level 1: simple check on any string or serlized strings
 								foreach ($list as $item) {
 									$edited_data = self::recursive_unserialize_replace($item['search'], $item['replace'], $edited_data);
 								}
 
-								//Replace logic - level 2: repair larger/complex serilized strings
+								//Replace logic - level 2: repair serilized strings that have become broken
 								$serial_check = self::fix_serial_string($edited_data);
-								if ($serial_check['fixed']) {
+								if ($serial_check['fixed']) 
+								{
 									$edited_data = $serial_check['data'];
-								} elseif ($serial_check['tried'] && !$serial_check['fixed']) {
+								} 
+								elseif ($serial_check['tried'] && !$serial_check['fixed']) 
+								{
 									$serial_err++;
 								}
 							}
 
 							//Change was made
-							if ($edited_data != $data_to_fix || $serial_err > 0) {
+							if ($edited_data != $data_to_fix || $serial_err > 0) 
+							{
 								$report['updt_cells']++;
 								//Base 64 encode
 								if ($base64coverted) {
@@ -879,11 +1073,12 @@ class DUPX_Serializer {
 						}
 
 						//PERFORM ROW UPDATE
-						if ($upd && !empty($where_sql)) {
+						if ($upd && !empty($where_sql)) 
+						{
 							$sql = "UPDATE `{$table}` SET " . implode(', ', $upd_sql) . ' WHERE ' . implode(' AND ', array_filter($where_sql));
 							$result = mysqli_query($conn, $sql) or $report['errsql'][] = mysqli_error($conn);
 							//DEBUG ONLY:
-							DUPX_Log::Info("\t{$sql}", 3);
+							DUPX_Log::Info("\t{$sql}\n", 3);
 							if ($result) {
 								if ($serial_err > 0) {
 									$report['errser'][] = "SELECT " . implode(', ', $upd_col) . " FROM `{$table}`  WHERE " . implode(' AND ', array_filter($where_sql)) . ';';
@@ -894,7 +1089,7 @@ class DUPX_Serializer {
 							$report['errkey'][] = sprintf("Row [%s] on Table [%s] requires a manual update.", $current_row, $table);
 						}
 					}
-					DupUtil::fcgi_flush();
+					DUPX_Util::fcgi_flush();
 					@mysqli_free_result($data);
 				}
 
@@ -903,8 +1098,8 @@ class DUPX_Serializer {
 				}
 			}
 		}
-		$profile_end = DupUtil::get_microtime();
-		$report['time'] = DupUtil::elapsed_time($profile_end, $profile_start);
+		$profile_end = DUPX_Util::get_microtime();
+		$report['time'] = DUPX_Util::elapsed_time($profile_end, $profile_start);
 		$report['errsql_sum'] = empty($report['errsql']) ? 0 : count($report['errsql']);
 		$report['errser_sum'] = empty($report['errser']) ? 0 : count($report['errser']);
 		$report['errkey_sum'] = empty($report['errkey']) ? 0 : count($report['errkey']);
@@ -921,29 +1116,60 @@ class DUPX_Serializer {
 	 * @param bool   $serialised Does the array passed via $data need serialising.
 	 * @return array	The original array with all elements replaced as needed. 
 	 */
-	static private function recursive_unserialize_replace($from = '', $to = '', $data = '', $serialised = false) {
-
+	public static function recursive_unserialize_replace($from = '', $to = '', $data = '', $serialised = false) 
+	{
 		// some unseriliased data cannot be re-serialised eg. SimpleXMLElements
-		try {
-
-			if (is_string($data) && ($unserialized = @unserialize($data)) !== false) {
+		try 
+		{
+			if (is_string($data) && ($unserialized = @unserialize($data)) !== false) 
+			{
 				$data = self::recursive_unserialize_replace($from, $to, $unserialized, true);
-			} elseif (is_array($data)) {
+			} 
+			elseif (is_array($data)) 
+			{
 				$_tmp = array();
-				foreach ($data as $key => $value) {
+				foreach ($data as $key => $value) 
+				{
 					$_tmp[$key] = self::recursive_unserialize_replace($from, $to, $value, false);
 				}
 				$data = $_tmp;
 				unset($_tmp);
-			} elseif (is_object($data)) {
+				
+				/* CJL
+					Check for an update to the key of an array e.g.   [http://localhost/projects/wpplugins/] => 1.41
+					This could have unintended consequences would need to enable with full-search needs more testing
+				if (array_key_exists($from, $data)) 
+				{
+					$data[$to] = $data[$from];
+					unset($data[$from]);
+				}*/				
+				
+			} 
+			elseif (is_object($data)) 
+			{
+				/* RSR Old logic that didn't work with Beaver Builder - they didn't want to create a brand new 
+				object instead reused the existing one... 
 				$dataClass = get_class($data);
 				$_tmp = new $dataClass();
 				foreach ($data as $key => $value) {
 					$_tmp->$key = self::recursive_unserialize_replace($from, $to, $value, false);
 				}
 				$data = $_tmp;
+				unset($_tmp);*/
+				
+				// RSR NEW LOGIC
+				$_tmp = $data; 
+				$props = get_object_vars( $data );
+				foreach ($props as $key => $value) 
+				{
+					$_tmp->$key = self::recursive_unserialize_replace( $from, $to, $value, false );
+				}
+				$data = $_tmp;
 				unset($_tmp);
-			} else {
+			} 
+
+			else 
+			{
 				if (is_string($data)) {
 					$data = str_replace($from, $to, $data);
 				}
@@ -951,7 +1177,10 @@ class DUPX_Serializer {
 
 			if ($serialised)
 				return serialize($data);
-		} catch (Exception $error) {
+			
+		} 
+		catch (Exception $error) 
+		{
 			DUPX_Log::Info("\nRECURSIVE UNSERIALIZE ERROR: With string\n" . $error, 2);
 		}
 		return $data;
@@ -960,7 +1189,8 @@ class DUPX_Serializer {
 	/**
 	 *  IS_SERIALIZED
 	 *  Test if a string in properly serialized */
-	static public function is_serialized($data) {
+	public static function is_serialized($data) 
+	{
 		$test = @unserialize(($data));
 		return ($test !== false || $test === 'b:0;') ? true : false;
 	}
@@ -971,23 +1201,28 @@ class DUPX_Serializer {
 	 *  @param string $data	The string ojbect to recalculate the size on.
 	 *  @return 
 	 */
-	static private function fix_serial_string($data) {
-
+	public static function fix_serial_string($data) 
+	{
 		$result = array('data' => $data, 'fixed' => false, 'tried' => false);
-
-		if (preg_match("/s:[0-9]+:/", $data)) {
-			if (!self::is_serialized($data)) {
+		if (preg_match("/s:[0-9]+:/", $data)) 
+		{
+			if (!self::is_serialized($data)) 
+			{
 				$regex = '!(?<=^|;)s:(\d+)(?=:"(.*?)";(?:}|a:|s:|b:|d:|i:|o:|N;))!s';
 				$serial_string = preg_match('/^s:[0-9]+:"(.*$)/s', trim($data), $matches);
 				//Nested serial string
-				if ($serial_string) {
-					$inner = preg_replace_callback($regex, 'DupDBTextSwap::fix_string_callback', rtrim($matches[1], '";'));
+				if ($serial_string) 
+				{
+					$inner = preg_replace_callback($regex, 'DUPX_UpdateEngine::fix_string_callback', rtrim($matches[1], '";'));
 					$serialized_fixed = 's:' . strlen($inner) . ':"' . $inner . '";';
-				} else {
-					$serialized_fixed = preg_replace_callback($regex, 'DupDBTextSwap::fix_string_callback', $data);
+				} 
+				else 
+				{
+					$serialized_fixed = preg_replace_callback($regex, 'DUPX_UpdateEngine::fix_string_callback', $data);
 				}
-
-				if (self::is_serialized($serialized_fixed)) {
+				
+				if (self::is_serialized($serialized_fixed)) 
+				{
 					$result['data'] = $serialized_fixed;
 					$result['fixed'] = true;
 				}
@@ -997,7 +1232,8 @@ class DUPX_Serializer {
 		return $result;
 	}
 
-	static private function fix_string_callback($matches) {
+	private static function fix_string_callback($matches) 
+	{
 		return 's:' . strlen(($matches[2]));
 	}
 
@@ -1011,22 +1247,21 @@ if (isset($_POST['action_ajax'])) {
             ?> <?php
 // Exit if accessed directly
 if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
 	header("Location: $_baseURL");
 	exit;
 }
 
 //POST PARAMS
-$_POST['dbaction']		= isset($_POST['dbaction']) ? $_POST['dbaction'] : 'create';
-$_POST['dbnbsp']		= (isset($_POST['dbnbsp']) && $_POST['dbnbsp'] == '1') ? true : false;
-$_POST['ssl_admin']		= (isset($_POST['ssl_admin'])) ? true : false;
-$_POST['ssl_login']		= (isset($_POST['ssl_login'])) ? true : false;
-$_POST['cache_wp']		= (isset($_POST['cache_wp'])) ? true : false;
-$_POST['cache_path']	= (isset($_POST['cache_path'])) ? true : false;
-$_POST['package_name']	= isset($_POST['package_name']) ? $_POST['package_name'] : null;
-$_POST['zip_manual']	= (isset($_POST['zip_manual']) && $_POST['zip_manual'] == '1') ? true : false;
+$_POST['dbaction']			= isset($_POST['dbaction']) ? $_POST['dbaction'] : 'create';
+$_POST['dbnbsp']			= (isset($_POST['dbnbsp']) && $_POST['dbnbsp'] == '1') ? true : false;
+$_POST['ssl_admin']			= (isset($_POST['ssl_admin']))  ? true : false;
+$_POST['ssl_login']			= (isset($_POST['ssl_login']))  ? true : false;
+$_POST['cache_wp']			= (isset($_POST['cache_wp']))   ? true : false;
+$_POST['cache_path']		= (isset($_POST['cache_path'])) ? true : false;
+$_POST['package_name']		= isset($_POST['package_name']) ? $_POST['package_name'] : null;
+$_POST['zip_manual']		= (isset($_POST['zip_manual']) && $_POST['zip_manual'] == '1') ? true : false;
 
 //LOGGING
 $POST_LOG = $_POST;
@@ -1034,10 +1269,10 @@ unset($POST_LOG['dbpass']);
 ksort($POST_LOG);
 
 //PAGE VARS
-$root_path		= DupUtil::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
+$root_path		= DUPX_Util::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
 $package_path	= "{$root_path}/{$_POST['package_name']}";
 $package_size	= @filesize($package_path);
-$ajax1_start	= DupUtil::get_microtime();
+$ajax1_start	= DUPX_Util::get_microtime();
 $zip_support	= class_exists('ZipArchive') ? 'Enabled' : 'Not Enabled';
 $JSON = array();
 $JSON['pass'] = 0;
@@ -1047,32 +1282,80 @@ cause errors in the JSON data Here we hide the status so warning level is reset 
 $ajax1_error_level = error_reporting();
 error_reporting(E_ERROR);
 
-//===============================
+//====================================================================================================
 //DATABASE TEST CONNECTION
-//===============================
-if (isset($_GET['dbtest'])) {
-
+//====================================================================================================
+if (isset($_GET['dbtest'])) 
+{
 	$html     = "";
 	$baseport =  parse_url($_POST['dbhost'], PHP_URL_PORT);
-	$dbConn   = DupUtil::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], null, $_POST['dbport']);
+	$dbConn   = DUPX_Util::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], null, $_POST['dbport']);
 	$dbErr	  = mysqli_connect_error();
+
 	$dbFound  = mysqli_select_db($dbConn, $_POST['dbname']);
 	$port_view = (is_int($baseport) || substr($_POST['dbhost'], -1) == ":") ? "Port=[Set in Host]" : "Port={$_POST['dbport']}";
 
 	$tstSrv   = ($dbConn)  ? "<div class='dup-pass'>Success</div>" : "<div class='dup-fail'>Fail</div>";
 	$tstDB    = ($dbFound) ? "<div class='dup-pass'>Success</div>" : "<div class='dup-fail'>Fail</div>";
-	$html	 .= "<div class='dup-db-test'>";
-	$html	 .= "<small style='display:block; padding:5px'>Using Connection String:<br/>Host={$_POST['dbhost']}; Database={$_POST['dbname']}; Uid={$_POST['dbuser']}; Pwd={$_POST['dbpass']}; {$port_view}</small>";
-	$html	 .= "<label>Server Connected:</label> {$tstSrv} <br/>";
-	$html	 .= "<label>Database Found:</label>   {$tstDB} <br/>";
+	
+	$dbvar_version = DUPX_Util::mysql_version($dbConn);
+	$dbvar_version = ($dbvar_version == 0) ? 'no connection' : $dbvar_version;
+	$dbvar_version_fail = version_compare($dbvar_version, $GLOBALS['FW_VERSION_DB']) < 0;
+	$tstCompat = ($dbvar_version_fail)
+		? "<div class='dup-notice'>This Server: [{$dbvar_version}] -- Package Server: [{$GLOBALS['FW_VERSION_DB']}]</div>" 
+		: "<div class='dup-pass'>This Server: [{$dbvar_version}] -- Package Server: [{$GLOBALS['FW_VERSION_DB']}]</div>";
+	
+	$html	 .= <<<DATA
+	<div class='dup-db-test'>
+		<small>
+			Using Connection String:<br/>
+			Host={$_POST['dbhost']}; Database={$_POST['dbname']}; Uid={$_POST['dbuser']}; Pwd={$_POST['dbpass']}; {$port_view}
+		</small>
+		<table class='dup-db-test-dtls'>
+			<tr>
+				<td>Host:</td>
+				<td>{$tstSrv}</td>
+			</tr>
+			<tr>
+				<td>Database:</td>
+				<td>{$tstDB}</td>
+			</tr>	
+			<tr>
+				<td>Version:</td>
+				<td>{$tstCompat}</td>
+			</tr>		
+		</table>
+DATA;
+	
+	//--------------------------------
+	//WARNING: DB has tables with create option
+	if ($_POST['dbaction'] == 'create')
+	{
+		$tblcount = DUPX_Util::dbtable_count($dbConn, $_POST['dbname']);
+		$html .= ($tblcount > 0) 
+			? "<div class='warn-msg'><b>WARNING:</b> " . sprintf(ERR_DBEMPTY, $_POST['dbname'], $tblcount) . "</div>"
+			: '';
+	}				
 
-
-	if ($_POST['dbaction'] == 'create'){
-		$tblcount = DupUtil::dbtable_count($dbConn, $_POST['dbname']);
-		$html .= ($tblcount > 0)
-		? "<div class='dup-fail'><b>WARNING</b></div><br/>" . sprintf(ERR_DBEMPTY, $_POST['dbname'], $tblcount)
-		: "";
+	//WARNNG: Input has utf8
+	$dbConnItems = array($_POST['dbhost'], $_POST['dbuser'], $_POST['dbname'],$_POST['dbpass']);
+	$dbUTF8_tst  = false;
+	foreach ($dbConnItems as $value)
+	{
+		if (DUPX_Util::is_non_ascii($value)) {
+			$dbUTF8_tst = true;
+			break;
+		}
 	}
+	$html .=  (! $dbConn && $dbUTF8_tst) 
+		? "<div class='warn-msg'><b>WARNING:</b> " . ERR_TESTDB_UTF8 .  "</div>"	
+		: '';
+	
+	//WARNING Version Incompat
+	$html .=  ($dbvar_version_fail)  
+		? "<div class='warn-msg'><b>NOTICE:</b> " . ERR_TESTDB_VERSION . "</div>" 
+		: '';
+
 	$html .= "</div>";
 	die($html);
 }
@@ -1087,7 +1370,7 @@ if (isset($_GET['dbtest'])) {
 function_exists('mysqli_connect') or DUPX_Log::Error(ERR_MYSQLI_SUPPORT);
 
 //ERR_DBCONNECT
-$dbh = DupUtil::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], null, $_POST['dbport']);
+$dbh = DUPX_Util::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], null, $_POST['dbport']);
 @mysqli_query($dbh, "SET wait_timeout = {$GLOBALS['DB_MAX_TIME']}");
 ($dbh) or DUPX_Log::Error(ERR_DBCONNECT . mysqli_connect_error());
 if ($_POST['dbaction'] == 'empty') {
@@ -1095,7 +1378,7 @@ if ($_POST['dbaction'] == 'empty') {
 }
 //ERR_DBEMPTY
 if ($_POST['dbaction'] == 'create' ) {
-	$tblcount = DupUtil::dbtable_count($dbh, $_POST['dbname']);
+	$tblcount = DUPX_Util::dbtable_count($dbh, $_POST['dbname']);
 	if ($tblcount > 0) {
 		DUPX_Log::Error(sprintf(ERR_DBEMPTY, $_POST['dbname'], $tblcount));
 	}
@@ -1116,7 +1399,7 @@ if ($_POST['zip_manual']) {
 }
 
 DUPX_Log::Info("********************************************************************************");
-DUPX_Log::Info('DUPLICATOR INSTALL-LOG');
+DUPX_Log::Info('DUPLICATOR-LITE INSTALL-LOG');
 DUPX_Log::Info('STEP1 START @ ' . @date('h:i:s'));
 DUPX_Log::Info('NOTICE: Do NOT post to public sites or forums');
 DUPX_Log::Info("********************************************************************************");
@@ -1143,11 +1426,11 @@ $log  = "\n*********************************************************************
 $log .= "ARCHIVE SETUP\n";
 $log .= "********************************************************************************\n";
 $log .= "NAME:\t{$_POST['package_name']}\n";
-$log .= "SIZE:\t" . DupUtil::readable_bytesize(@filesize($_POST['package_name'])) . "\n";
+$log .= "SIZE:\t" . DUPX_Util::readable_bytesize(@filesize($_POST['package_name'])) . "\n";
 $log .= "ZIP:\t{$zip_support} (ZipArchive Support)";
 DUPX_Log::Info($log);
 
-$zip_start = DupUtil::get_microtime();
+$zip_start = DUPX_Util::get_microtime();
 
 if ($_POST['zip_manual']) {
 	DUPX_Log::Info("\n** PACKAGE EXTRACTION IS IN MANUAL MODE ** \n");
@@ -1183,71 +1466,20 @@ if ($_POST['zip_manual']) {
 	$zip = null;
 }
 
-//===============================
-//WP-CONFIG: wp-config
-//===============================
-$wpconfig = @file_get_contents('wp-config.php', true);
-
-$patterns = array(
-	"/'DB_NAME',\s*'.*?'/",
-	"/'DB_USER',\s*'.*?'/",
-	"/'DB_PASSWORD',\s*'.*?'/",
-	"/'DB_HOST',\s*'.*?'/");
-
-$db_host = ($_POST['dbport'] == 3306) ? $_POST['dbhost'] : "{$_POST['dbhost']}:{$_POST['dbport']}";
-
-$replace = array(
-	"'DB_NAME', "	  . '\'' . $_POST['dbname']				. '\'',
-	"'DB_USER', "	  . '\'' . $_POST['dbuser']				. '\'',
-	"'DB_PASSWORD', " . '\'' . DupUtil::preg_replacement_quote($_POST['dbpass']) . '\'',
-	"'DB_HOST', "	  . '\'' . $db_host				. '\'');
-
-//SSL CHECKS
-if ($_POST['ssl_admin']) {
-	if (! strstr($wpconfig, 'FORCE_SSL_ADMIN')) {
-		$wpconfig = $wpconfig . PHP_EOL . "define('FORCE_SSL_ADMIN', true);";
-	}
-} else {
-	array_push($patterns, "/'FORCE_SSL_ADMIN',\s*true/");
-	array_push($replace,  "'FORCE_SSL_ADMIN', false");
-}
-
-if ($_POST['ssl_login']) {
-	if (! strstr($wpconfig, 'FORCE_SSL_LOGIN')) {
-		$wpconfig = $wpconfig . PHP_EOL . "define('FORCE_SSL_LOGIN', true);";
-	}
-} else {
-	array_push($patterns, "/'FORCE_SSL_LOGIN',\s*true/");
-	array_push($replace, "'FORCE_SSL_LOGIN', false");
-}
-
-//CACHE CHECKS
-if ($_POST['cache_wp']) {
-	if (! strstr($wpconfig, 'WP_CACHE')) {
-		$wpconfig = $wpconfig . PHP_EOL . "define('WP_CACHE', true);";
-	}
-} else {
-	array_push($patterns, "/'WP_CACHE',\s*true/");
-	array_push($replace,  "'WP_CACHE', false");
-}
-if (! $_POST['cache_path']) {
-	array_push($patterns, "/'WPCACHEHOME',\s*'.*?'/");
-	array_push($replace,  "'WPCACHEHOME', ''");
-}
-
-$wpconfig = preg_replace($patterns, $replace, $wpconfig);
-file_put_contents('wp-config.php', $wpconfig);
-$wpconfig = null;
 
 //CONFIG FILE RESETS
-DUPX_Config::Reset();
+DUPX_WPConfig::UpdateStep1();
+DUPX_ServerConfig::Reset();
 
 
-//===============================
-//DATABASE SCRIPT
-//===============================
+//====================================================================================================
+//DATABASE ROUTINES
+//====================================================================================================
 @chmod("{$root_path}/database.sql", 0777);
-$sql_file = @file_get_contents('database.sql', true);
+if (filesize("{$root_path}/database.sql") > 100000000) {
+	DUPX_Log::Info("\nWARNING: Database Script is larger than 100MB this may lead to PHP memory allocation issues on some budget hosts.");
+}
+$sql_file = file_get_contents('database.sql', true);
 if ($sql_file == false || strlen($sql_file) < 10) {
 	$sql_file = file_get_contents('installer-data.sql', true);
 	if ($sql_file == false || strlen($sql_file) < 10) {
@@ -1277,27 +1509,44 @@ if (!is_readable($sql_result_file_path) || filesize($sql_result_file_path) == 0)
 
 DUPX_Log::Info("\nUPDATED FILES:");
 DUPX_Log::Info("- SQL FILE:  '{$sql_result_file_path}'");
-DUPX_Log::Info("- WP-CONFIG: '{$root_path}/wp-config.php'");
-$zip_end = DupUtil::get_microtime();
-DUPX_Log::Info("\nARCHIVE RUNTIME: " . DupUtil::elapsed_time($zip_end, $zip_start));
+DUPX_Log::Info("- WP-CONFIG: '{$root_path}/wp-config.php' (if present)");
+$zip_end = DUPX_Util::get_microtime();
+DUPX_Log::Info("\nARCHIVE RUNTIME: " . DUPX_Util::elapsed_time($zip_end, $zip_start));
 DUPX_Log::Info("\n");
-DupUtil::fcgi_flush();
+DUPX_Util::fcgi_flush();
 
-
-//====================================================================================================
-//DATABASE ROUTINES
-//====================================================================================================
-
+//=================================
+//START DB RUN
 @mysqli_query($dbh, "SET wait_timeout = {$GLOBALS['DB_MAX_TIME']}");
 @mysqli_query($dbh, "SET max_allowed_packet = {$GLOBALS['DB_MAX_PACKETS']}");
-DupUtil::mysql_set_charset($dbh, $_POST['dbcharset'], $_POST['dbcollate']);
+DUPX_Util::mysql_set_charset($dbh, $_POST['dbcharset'], $_POST['dbcollate']);
 
-//Set defaults incase the variable could not be read
-$dbvar_maxtime = DupUtil::mysql_variable_value($dbh, 'wait_timeout');
-$dbvar_maxpacks = DupUtil::mysql_variable_value($dbh, 'max_allowed_packet');
-$dbvar_maxtime = is_null($dbvar_maxtime) ? 300 : $dbvar_maxtime;
-$dbvar_maxpacks = is_null($dbvar_maxpacks) ? 1048576 : $dbvar_maxpacks;
+//Will set mode to null only for this db handle session
+//sql_mode can cause db create issues on some systems
+switch ($_POST['dbmysqlmode']) {
+    case 'DISABLE':
+        @mysqli_query($dbh, "SET SESSION sql_mode = ''");
+        break;
+    case 'CUSTOM':
+		$dbmysqlmode_opts = $_POST['dbmysqlmode_opts'];
+		$qry_session_custom = @mysqli_query($dbh, "SET SESSION sql_mode = '{$dbmysqlmode_opts}'");
+        if ($qry_session_custom == false) 
+		{
+			$sql_error = mysqli_error($dbh);
+			$log  = "WARNING: A custom sql_mode setting issue has been detected:\n{$sql_error}.\n";
+			$log .= "For more details visit: http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html\n";
+		}
+        break;
+}
 
+//Set defaults in-case the variable could not be read
+$dbvar_maxtime		= DUPX_Util::mysql_variable_value($dbh, 'wait_timeout');
+$dbvar_maxpacks		= DUPX_Util::mysql_variable_value($dbh, 'max_allowed_packet');
+$dbvar_sqlmode		= DUPX_Util::mysql_variable_value($dbh, 'sql_mode');
+$dbvar_maxtime		= is_null($dbvar_maxtime) ? 300 : $dbvar_maxtime;
+$dbvar_maxpacks		= is_null($dbvar_maxpacks) ? 1048576 : $dbvar_maxpacks;
+$dbvar_sqlmode		= empty($dbvar_sqlmode) ? 'NOT_SET'  : $dbvar_sqlmode;
+$dbvar_version		= DUPX_Util::mysql_version($dbh);
 
 DUPX_Log::Info("{$GLOBALS['SEPERATOR1']}");
 DUPX_Log::Info('DATABASE-ROUTINES');
@@ -1305,9 +1554,15 @@ DUPX_Log::Info("{$GLOBALS['SEPERATOR1']}");
 DUPX_Log::Info("--------------------------------------");
 DUPX_Log::Info("SERVER ENVIROMENT");
 DUPX_Log::Info("--------------------------------------");
-DUPX_Log::Info("MYSQL VERSION:\t" . mysqli_get_server_info($dbh));
+DUPX_Log::Info("MYSQL VERSION:\tThis Server: {$dbvar_version} -- Build Server: {$GLOBALS['FW_VERSION_DB']}");
 DUPX_Log::Info("TIMEOUT:\t{$dbvar_maxtime}");
 DUPX_Log::Info("MAXPACK:\t{$dbvar_maxpacks}");
+DUPX_Log::Info("SQLMODE:\t{$dbvar_sqlmode}");
+
+if ($qry_session_custom == false) 
+{
+	DUPX_Log::Info("\n{$log}\n");
+}
 
 //CREATE DB
 switch ($_POST['dbaction']) {
@@ -1343,7 +1598,7 @@ switch ($_POST['dbaction']) {
 DUPX_Log::Info("--------------------------------------");
 DUPX_Log::Info("DATABASE RESULTS");
 DUPX_Log::Info("--------------------------------------");
-$profile_start = DupUtil::get_microtime();
+$profile_start = DUPX_Util::get_microtime();
 $fcgi_buffer_pool = 5000;
 $fcgi_buffer_count = 0;
 $dbquery_rows = 0;
@@ -1365,10 +1620,10 @@ while ($counter < $sql_result_file_length) {
 
 			if (!mysqli_ping($dbh)) {
 				mysqli_close($dbh);
-				$dbh = DupUtil::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], $_POST['dbname'], $_POST['dbport'] );
+				$dbh = DUPX_Util::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], $_POST['dbname'], $_POST['dbport'] );
 				// Reset session setup
 				@mysqli_query($dbh, "SET wait_timeout = {$GLOBALS['DB_MAX_TIME']}");
-				DupUtil::mysql_set_charset($dbh, $_POST['dbcharset'], $_POST['dbcollate']);
+				DUPX_Util::mysql_set_charset($dbh, $_POST['dbcharset'], $_POST['dbcollate']);
 			}
 			DUPX_Log::Info("**ERROR** database error write '{$err}' - [sql=" . substr($sql_result_file_data[$counter], 0, 75) . "...]");
 			$dbquery_errs++;
@@ -1377,7 +1632,7 @@ while ($counter < $sql_result_file_length) {
 		} else {
 			if ($fcgi_buffer_count++ > $fcgi_buffer_pool) {
 				$fcgi_buffer_count = 0;
-				DupUtil::fcgi_flush();
+				DUPX_Util::fcgi_flush();
 			}
 			$dbquery_rows++;
 		}
@@ -1394,7 +1649,7 @@ DUPX_Log::Info("QUERIES RAN:\t{$dbquery_rows}\n");
 $dbtable_count = 0;
 if ($result = mysqli_query($dbh, "SHOW TABLES")) {
 	while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
-		$table_rows = DupUtil::table_row_count($dbh, $row[0]);
+		$table_rows = DUPX_Util::table_row_count($dbh, $row[0]);
 		$dbtable_rows += $table_rows;
 		DUPX_Log::Info("{$row[0]}: ({$table_rows})");
 		$dbtable_count++;
@@ -1403,8 +1658,9 @@ if ($result = mysqli_query($dbh, "SHOW TABLES")) {
 }
 
 if ($dbtable_count == 0) {
-	DUPX_Log::Info("NOTICE: You may have to manually run the installer-data.sql to validate data input. Also check to make sure your installer file is correct and the
-		table prefix '{$GLOBALS['FW_TABLEPREFIX']}' is correct for this particular version of WordPress. \n");
+	DUPX_Log::Error("No tables where created during step 1 of the install.  Please review the installer-log.txt file for sql error messages.
+		You may have to manually run the installer-data.sql with a tool like phpmyadmin to validate the data input.  If you have enabled compatibility mode
+		during the package creation process then the database server version your using may not be compatible with this script.\n");
 }
 
 
@@ -1424,12 +1680,12 @@ foreach ($GLOBALS['FW_OPTS_DELETE'] as $value) {
 
 @mysqli_close($dbh);
 
-$profile_end = DupUtil::get_microtime();
-DUPX_Log::Info("\nSECTION RUNTIME: " . DupUtil::elapsed_time($profile_end, $profile_start));
+$profile_end = DUPX_Util::get_microtime();
+DUPX_Log::Info("\nSECTION RUNTIME: " . DUPX_Util::elapsed_time($profile_end, $profile_start));
 
 //FINAL RESULTS
-$ajax1_end = DupUtil::get_microtime();
-$ajax1_sum = DupUtil::elapsed_time($ajax1_end, $ajax1_start);
+$ajax1_end = DUPX_Util::get_microtime();
+$ajax1_sum = DUPX_Util::elapsed_time($ajax1_end, $ajax1_start);
 DUPX_Log::Info("\n{$GLOBALS['SEPERATOR1']}");
 DUPX_Log::Info('STEP1 COMPLETE @ ' . @date('h:i:s') . " - TOTAL RUNTIME: {$ajax1_sum}");
 DUPX_Log::Info("{$GLOBALS['SEPERATOR1']}");
@@ -1446,8 +1702,7 @@ die('');
             ?> <?php
 // Exit if accessed directly
 if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
 	header("Location: $_baseURL");
 	exit; 
@@ -1462,13 +1717,13 @@ error_reporting(E_ERROR);
 //DATABASE UPDATES
 //====================================================================================================
 
-$ajax2_start = DupUtil::get_microtime();
+$ajax2_start = DUPX_Util::get_microtime();
 
 //MYSQL CONNECTION
-$dbh = DupUtil::db_connect($_POST['dbhost'], $_POST['dbuser'], html_entity_decode($_POST['dbpass']), $_POST['dbname'], $_POST['dbport']);
+$dbh = DUPX_Util::db_connect($_POST['dbhost'], $_POST['dbuser'], html_entity_decode($_POST['dbpass']), $_POST['dbname'], $_POST['dbport']);
 $charset_server = @mysqli_character_set_name($dbh);
 @mysqli_query($dbh, "SET wait_timeout = {$GLOBALS['DB_MAX_TIME']}");
-DupUtil::mysql_set_charset($dbh, $_POST['dbcharset'], $_POST['dbcollate']);
+DUPX_Util::mysql_set_charset($dbh, $_POST['dbcharset'], $_POST['dbcollate']);
 
 //POST PARAMS
 $_POST['blogname'] = mysqli_real_escape_string($dbh, $_POST['blogname']);
@@ -1494,7 +1749,7 @@ $charset_client = @mysqli_character_set_name($dbh);
 $log = <<<LOG
 \n\n
 ********************************************************************************
-DUPLICATOR INSTALL-LOG
+DUPLICATOR-LITE INSTALL-LOG
 STEP2 START @ {$date}
 NOTICE: Do not post to public sites or forums
 ********************************************************************************
@@ -1541,15 +1796,23 @@ $path_old_json = str_replace('"', "", json_encode($_POST['path_old']));
 $path_new_json = str_replace('"', "", json_encode($_POST['path_new']));
 
 array_push($GLOBALS['REPLACE_LIST'], 
-		array('search' => $_POST['url_old'],  'replace' => $_POST['url_new']), 
-		array('search' => $url_old_json,	  'replace' => $url_new_json), 
-		array('search' => $_POST['path_old'], 'replace' => $_POST['path_new']), 
-		array('search' => $path_old_json,	  'replace' => $path_new_json), 		
-		array('search' => rtrim(DupUtil::unset_safe_path($_POST['path_old']), '\\'), 'replace' => rtrim($_POST['path_new'], '/'))
+		array('search' => $_POST['url_old'],			 'replace' => $_POST['url_new']), 
+		array('search' => $_POST['path_old'],			 'replace' => $_POST['path_new']), 
+		array('search' => $url_old_json,				 'replace' => $url_new_json), 
+		array('search' => $path_old_json,				 'replace' => $path_new_json), 	
+		array('search' => urlencode($_POST['path_old']), 'replace' => urlencode($_POST['path_new'])), 
+		array('search' => urlencode($_POST['url_old']),  'replace' => urlencode($_POST['url_new'])),
+		array('search' => rtrim(DUPX_Util::unset_safe_path($_POST['path_old']), '\\'), 'replace' => rtrim($_POST['path_new'], '/'))
 );
 
+//Remove trailing slashes
+function _dupx_array_rtrim(&$value) {
+    $value = rtrim($value, '\/');
+}
+array_walk_recursive($GLOBALS['REPLACE_LIST'], _dupx_array_rtrim);
+
 @mysqli_autocommit($dbh, false);
-$report = DUPX_Serializer::load($dbh, $GLOBALS['REPLACE_LIST'], $_POST['tables'], $GLOBALS['TABLES_SKIP_COLS'], $_POST['fullsearch']);
+$report = DUPX_UpdateEngine::load($dbh, $GLOBALS['REPLACE_LIST'], $_POST['tables'], $_POST['fullsearch']);
 @mysqli_commit($dbh);
 @mysqli_autocommit($dbh, true);
 
@@ -1561,8 +1824,8 @@ $JSON['step2'] = $report;
 $JSON['step2']['warn_all'] = 0;
 $JSON['step2']['warnlist'] = array();
 
-DUPX_Serializer::log_stats($report);
-DUPX_Serializer::log_errors($report);
+DUPX_UpdateEngine::log_stats($report);
+DUPX_UpdateEngine::log_errors($report);
 
 //Reset the postguid data
 if ($_POST['postguid']) {
@@ -1628,11 +1891,19 @@ if (strlen($_POST['wp_username']) >= 4 && strlen($_POST['wp_password']) >= 6) {
 	}
 }
 
-/*MU Updates*/
+/* ==============================
+ * MU Updates*/
 $mu_newDomain = parse_url($_POST['url_new']);
 $mu_oldDomain = parse_url($_POST['url_old']);
 $mu_newDomainHost = $mu_newDomain['host'];
 $mu_oldDomainHost = $mu_oldDomain['host'];
+$mu_newUrlPath = parse_url($_POST['url_new'], PHP_URL_PATH);
+$mu_oldUrlPath = parse_url($_POST['url_old'], PHP_URL_PATH);
+
+//Force a path for PATH_CURRENT_SITE
+$mu_newUrlPath = (empty($mu_newUrlPath) || ($mu_newUrlPath == '/')) ? '/'  : rtrim($mu_newUrlPath, '/') . '/';
+$mu_oldUrlPath = (empty($mu_oldUrlPath) || ($mu_oldUrlPath == '/')) ? '/'  : rtrim($mu_oldUrlPath, '/') . '/';
+
 $mu_updates = @mysqli_query($dbh, "UPDATE `{$GLOBALS['FW_TABLEPREFIX']}blogs` SET domain = '{$mu_newDomainHost}' WHERE domain = '{$mu_oldDomainHost}'");
 if ($mu_updates) {
 	DUPX_Log::Info("Update MU table blogs: domain {$mu_newDomainHost} ");
@@ -1641,21 +1912,12 @@ if ($mu_updates) {
 }
 
 
-/*UPDATE WP-CONFIG FILE */
-$patterns = array("/'WP_HOME',\s*'.*?'/", 
-				  "/'WP_SITEURL',\s*'.*?'/",
-				  "/'DOMAIN_CURRENT_SITE',\s*'.*?'/");
+/* ==============================
+ * UPDATE WP-CONFIG FILE */
+$config_file = DUPX_WPConfig::UpdateStep2();
 
-$replace = array("'WP_HOME', "    . '\''		  . $_POST['url_new'] . '\'',
-				 "'WP_SITEURL', " . '\''		  . $_POST['url_new'] . '\'',
-				 "'DOMAIN_CURRENT_SITE', " . '\'' . $mu_newDomainHost     . '\'');
-
-$config_file = @file_get_contents('wp-config.php', true);
-$config_file = preg_replace($patterns, $replace, $config_file);
-file_put_contents('wp-config.php', $config_file);
-
-
-//Create Snapshots directory
+//Create snapshots directory in order to
+//compensate for permissions on some servers
 if (!file_exists(DUPLICATOR_SSDIR_NAME)) {
 	mkdir(DUPLICATOR_SSDIR_NAME, 0755);
 }
@@ -1663,28 +1925,29 @@ $fp = fopen(DUPLICATOR_SSDIR_NAME . '/index.php', 'w');
 fclose($fp);
 
 
-//===============================
-//WARNING TESTS
-//===============================
+/* ==============================
+NOTICE TESTS */
 DUPX_Log::Info("\n--------------------------------------");
-DUPX_Log::Info("WARNINGS");
+DUPX_Log::Info("NOTICES");
 DUPX_Log::Info("--------------------------------------");
 $config_vars = array('WP_CONTENT_DIR', 'WP_CONTENT_URL', 'WPCACHEHOME', 'COOKIE_DOMAIN', 'WP_SITEURL', 'WP_HOME', 'WP_TEMP_DIR');
-$config_found = DupUtil::string_has_value($config_vars, $config_file);
+$config_items = DUPX_Util::search_list_values($config_vars, $config_file);
 
-//Files
-if ($config_found) {
-	$msg = 'WP-CONFIG WARNING: The wp-config.php has one or more of these values "' . implode(", ", $config_vars) . '" which may cause issues please validate these values by opening the file.';
+//Files:
+if (! empty($config_items)) {
+	$msg  = 'NOTICE: The wp-config.php has one or more of the following values set [' . implode(", ", $config_items) . '].  ';
+	$msg .= 'Please validate these values are correct by opening the file and checking the values.  To validate the meaning and proper usage of each parameter used the codex link above.';
 	$JSON['step2']['warnlist'][] = $msg;
 	DUPX_Log::Info($msg);
 }
 
-//Database
+//Database: 
 $result = @mysqli_query($dbh, "SELECT option_value FROM `{$GLOBALS['FW_TABLEPREFIX']}options` WHERE option_name IN ('upload_url_path','upload_path')");
 if ($result) {
 	while ($row = mysqli_fetch_row($result)) {
 		if (strlen($row[0])) {
-			$msg = "MEDIA SETTINGS WARNING: The table '{$GLOBALS['FW_TABLEPREFIX']}options' has at least one the following values ['upload_url_path','upload_path'] set please validate settings. These settings can be changed in the wp-admin by going to Settings->Media area see 'Uploading Files'";
+			$msg  = "NOTICE: The media settings values in the table '{$GLOBALS['FW_TABLEPREFIX']}options' has at least one the following values ['upload_url_path','upload_path'] set.  ";
+			$msg .= "Please validate these settings by logging into your wp-admin and going to Settings->Media area and validating the 'Uploading Files' section";
 			$JSON['step2']['warnlist'][] = $msg;
 			DUPX_Log::Info($msg);
 			break;
@@ -1693,7 +1956,7 @@ if ($result) {
 }
 
 if (empty($JSON['step2']['warnlist'])) {
-	DUPX_Log::Info("No Warnings Found\n");
+	DUPX_Log::Info("No Notices Found\n");
 }
 
 $JSON['step2']['warn_all'] = empty($JSON['step2']['warnlist']) ? 0 : count($JSON['step2']['warnlist']);
@@ -1702,10 +1965,10 @@ mysqli_close($dbh);
 @unlink('database.sql');
 
 //CONFIG Setup
-DUPX_Config::Setup();
+DUPX_ServerConfig::Setup();
 
-$ajax2_end = DupUtil::get_microtime();
-$ajax2_sum = DupUtil::elapsed_time($ajax2_end, $ajax2_start);
+$ajax2_end = DUPX_Util::get_microtime();
+$ajax2_sum = DUPX_Util::elapsed_time($ajax2_end, $ajax2_start);
 DUPX_Log::Info("********************************************************************************");
 DUPX_Log::Info('STEP 2 COMPLETE @ ' . @date('h:i:s') . " - TOTAL RUNTIME: {$ajax2_sum}");
 DUPX_Log::Info("********************************************************************************");
@@ -1730,14 +1993,13 @@ die(json_encode($JSON));
 	<?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
 	}
 ?>
-<?php if( DupUtil::is_url_active("ajax.googleapis.com", 443) ): ?>
+<?php if( DUPX_Util::is_url_active("ajax.googleapis.com", 443) ): ?>
 	<link rel='stylesheet' href='//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css' type='text/css' media='all' />
 <?php else: ?>
 	<style type="text/css">
@@ -1753,8 +2015,7 @@ die(json_encode($JSON));
 	<?php
 	// Exit if accessed directly 
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] :$_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location:$_baseURL");
 		exit; 
@@ -1802,11 +2063,14 @@ die(json_encode($JSON));
 	select#dup-hlp-lnk {border-radius:3px; font-size:11px; margin:3px 5px 0 0px; background-color:#efefef; border:1px solid silver}
 	div.dup-help-page {padding:5px 0 0 5px}
 	div.dup-help-page fieldset {margin-bottom:25px}
-	div#dup-main-help h3 {background-color:#dfdfdf; border:1px solid silver; border-radius:5px; padding:3px; margin-bottom:8px}
+	div#dup-main-help {line-height:18px}
+	div#dup-main-help h3 {background-color:#dfdfdf; border:1px solid silver; border-radius:5px; padding:3px; margin-bottom:8px;}
 
 	div#progress-area {padding:5px; margin:150px 0 0 0px; text-align:center;}
 	div#ajaxerr-data {padding:5px; height:350px; width:99%; border:1px solid silver; border-radius:5px; background-color:#efefef; font-size:12px; overflow-y:scroll}
 	div.title-header {padding:2px; border-bottom:1px solid silver; font-weight:bold; margin-bottom:5px;}
+	div.hdr-main {font-size:18px; padding:0 0 5px 0; border-bottom:1px solid #999; font-weight:bold; margin:5px 0 10px 0;}
+	div.hdr-sub {font-size:14px; padding:2px 2px 2px 0; border-bottom:1px solid #dfdfdf; font-weight:bold; margin-bottom:5px;}
 	
 	/*BOXES:Expandable sections */
 	div.dup-box {padding:0px; display:block; background-color:#fff; border:1px solid #e5e5e5; box-shadow:0 1px 1px rgba(0,0,0,.04);}
@@ -1817,35 +2081,44 @@ die(json_encode($JSON));
 
 	/* ============================
 	STEP 1 VIEW */
-	i#dup-step1-sys-req-msg {font-weight:normal; display:block; padding:0px 0 0 20px;}
+	table.s1-opts {width:100%; border:0px;}
+	table.s1-opts td{white-space:nowrap; padding:3px;}
+	table.s1-opts td:first-child{width:125px;}
+	table.s1-opts-dbhost td {padding:0; margin:0}
+	table.s1-advopts td:first-child{width:125px; font-weight:bold}
+	
+	i#s1-sys-req-msg {font-weight:normal; display:block; padding:0px 0 0 20px;}
 	div.circle-pass, div.circle-fail {display:block;width:13px;height:13px;border-radius:50px;font-size:20px;color:#fff;line-height:100px;text-align:center;text-decoration:none;box-shadow:1px 1px 2px #000;background:#207D1D;opacity:0.95; display:inline-block;}
 	div.circle-fail {background:#9A0D1D !important;}
 	select#logging {font-size:11px}
-	table.dup-step1-inputs {width:100%; border:0px;}
-	table.dup-step1-inputs td{white-space:nowrap; padding:2px;}
-	table.dup-step1-inputs td:first-child{width:125px}
-	div.dup-step1-modes {padding:0px 15px 0 0px;}
-	div#dup-step1-dbconn {margin:auto; text-align:center; margin:15px 0 20px 0px}
-	input#dup-step1-dbconn-btn {font-size:11px; height:20px; border:1px solid gray; border-radius:3px; cursor:pointer}
-	input#dup-step1-dbport-btn {font-size:11px; height:20px; border:1px solid gray; border-radius:3px; cursor:pointer; width:85px}
-	div.dup-db-test label{display:inline-block; width:150px; font-weight:bold; white-space:nowrap;}
-	div.dup-db-test small{display:block; margin:5px 0 5px 0px; font-style:italic; color:#444}
+	div.s1-modes {padding:0px 15px 0 0px;}
+	div#s1-dbconn {margin:auto; text-align:center; margin:15px 0 20px 0px}
+	
+	input.s1-small-btn {font-size:11px; height:20px; border:1px solid gray; border-radius:3px; cursor:pointer}
+	input#s1-dbport-btn { width:80px}
+	div.dup-db-test small{display:block; font-style:italic; color:#333; padding:3px 2px 5px 2px; border-bottom:1px dashed silver; margin-bottom:10px; text-align: center }
+	table.dup-db-test-dtls {text-align: left; margin: auto}
+	table.dup-db-test-dtls td:first-child {font-weight: bold}
 	div#dbconn-test-msg {font-size:12px}
-	div#dup-step1-dbconn-status {border:1px solid silver; border-radius:3px; background-color:#f9f9f9; padding:10px; margin-top:10px; height:125px; overflow-y: scroll}
+	div#s1-dbconn-status {border:1px solid silver; border-radius:3px; background-color:#f9f9f9; padding:2px 5px; margin-top:10px; height:165px; overflow-y: scroll}
+	div#s1-dbconn-status div.warn-msg {text-align: left; padding:5px; margin:10px 0 10px 0}
+	div#s1-dbconn-status div.warn-msg b{color:maroon}
 	
 	/*Warning Area and Message */
-	div#dup-step1-warning {margin-top:40px;padding:5px;font-size:11px; color:gray; line-height:12px;font-style:italic; overflow-y:scroll; height:75px; border:1px solid #dfdfdf; background-color:#fff; border-radius:3px}
+	div.dup-step1-gopro {color: black;font-style: italic;margin-top: 11px; text-align:center;margin-top:30px; padding:5px}
+	div#dup-step1-warning {padding:5px;font-size:11px; color:gray; line-height:12px;font-style:italic; overflow-y:scroll; height:75px; border:1px solid #dfdfdf; background-color:#fff; border-radius:3px}
 	div#dup-step1-warning-check {padding:5px; font-size:12px; font-weight:normal; font-style:italic;}
 	div#dup-step1-warning-emptydb {display:none; color:#AF2222; margin:0px 0 0 20px}
 	div#dup-step1-tryagain {padding-top:50px; text-align:center; width:100%; font-size:16px; color:#444; font-weight:bold;}
 
 	/*Dialog*/
 	div#dup-step1-dialog-data {height:90%; font-size:11px; padding:5px; line-height:16px; }
-	td.dup-step1-dialog-data-details {padding:0px 0 0 30px; border-radius:4px; line-height:14px; font-size:11px; display:none}
+	td.dup-step1-dialog-data-details {padding:1px 0 10px 30px; border-radius:4px; line-height:14px; font-size:11px; display:none}
 	td.dup-step1-dialog-data-details b {width:50px;display:inline-block}
 	.dup-pass {display:inline-block; color:green;}
 	.dup-ok {display:inline-block; color:#5860C7;}
 	.dup-fail {display:inline-block; color:#AF0000;}
+	.dup-notice {display:inline-block; color:#000;}
 	hr.dup-dots { border:none; border-top:1px dotted silver; height:1px; width:100%;}
 	div.dup-ui-error {padding-top:2px; font-size:14px}
 	div.help {color:#555; font-style:italic; font-size:11px}
@@ -1859,28 +2132,33 @@ die(json_encode($JSON));
 
 	/* ============================
 	STEP 3 VIEW */
-	div.dup-step3-final-msg {height:110px; border:1px solid #CDCDCD; padding:8px;font-size:12px; border-radius:5px;box-shadow:0 4px 2px -2px #777;}
-	div.dup-step3-final-title {color:#BE2323;}
-	div.dup-step3-connect {font-size:12px; text-align:center; font-style:italic; position:absolute; bottom:10px; padding:10px; width:100%; margin-top:20px}
-	table.dup-step3-report-results,
-	table.dup-step3-report-errs {border-collapse:collapse; border:1px solid #dfdfdf; }
-	table.dup-step3-report-errs  td {text-align:center; width:33%}
-	table.dup-step3-report-results th, table.dup-step3-report-errs th {background-color:#efefef; padding:0px; font-size:12px; padding:0px}
-	table.dup-step3-report-results td, table.dup-step3-report-errs td {padding:0px; white-space:nowrap; border:1px solid #dfdfdf; text-align:center; font-size:11px}
-	table.dup-step3-report-results td:first-child {text-align:left; font-weight:bold; padding-left:3px}
+	div.s3-final-title {color:#BE2323;}
+	div.s3-connect {font-size:12px; text-align:center; font-style:italic; position:absolute; bottom:10px; padding:10px; width:100%; margin-top:20px}
+	table.s3-report-results,
+	table.s3-report-errs {border-collapse:collapse; border:1px solid #dfdfdf; }
+	table.s3-report-errs  td {text-align:center; width:33%}
+	table.s3-report-results th, table.s3-report-errs th {background-color:#efefef; padding:0px; font-size:12px; padding:0px}
+	table.s3-report-results td, table.s3-report-errs td {padding:0px; white-space:nowrap; border:1px solid #dfdfdf; text-align:center; font-size:11px}
+	table.s3-report-results td:first-child {text-align:left; font-weight:bold; padding-left:3px}
 
-	div.dup-step3-err-title a {}
-	div.dup-step3-err-msg {padding:8px;  display:none; border:1px dashed #999; margin:10px 0 20px 0px; border-radius:5px;}
-	div.dup-step3-err-msg div.content{padding:5px; font-size:11px; line-height:17px; max-height:125px; overflow-y:scroll; border:1px solid silver; margin:3px;  }
-	div.dup-step3-err-msg div.info{padding:2px; background-color:#FCFEC5; border:1px solid silver; border-radius:5px; font-size:11px; line-height:16px }
-	table.dup-step3-final-step {width:100%;}
-	table.dup-step3-final-step td {padding:5px 15px 5px 5px}
-	table.dup-step3-final-step td:first-child {white-space:nowrap; font-weight:bold}
-	div.dup-step3-go-back {border-bottom:1px dotted #dfdfdf; border-top:1px dotted #dfdfdf; margin:auto; text-align:center}
+	div.s3-err-msg {padding:8px;  display:none; border:1px dashed #999; margin:10px 0 20px 0px; border-radius:5px;}
+	div.s3-err-msg div.content{padding:5px; font-size:11px; line-height:17px; max-height:125px; overflow-y:scroll; border:1px solid silver; margin:3px;  }
+	div.s3-err-msg div.info-error{padding:7px; background-color:#EAA9AA; border:1px solid silver; border-radius:5px; font-size:12px; line-height:16px }
+	div.s3-err-msg div.info-notice{padding:7px; background-color:#FCFEC5; border:1px solid silver; border-radius:5px; font-size:12px; line-height:16px;}
+	table.s3-final-step {width:100%;}
+	table.s3-final-step td {padding:5px 15px 5px 5px}
+	table.s3-final-step td:first-child {white-space:nowrap; font-weight:bold}
+	div.s3-go-back {border-bottom:1px dotted #dfdfdf; border-top:1px dotted #dfdfdf; margin:auto; text-align:center; font-size: 12px}
+	div.s3-btns-msg {text-align: center; font-size:10px; color:#777; margin:5px 0 15px 0}
+	a.s3-final-btns {display: block; width:135; padding:5px; line-height: 1.4; background-color:#F1F1F1; border:1px solid silver;
+		color: #000; box-shadow: 5px 5px 5px -5px #949494; text-decoration: none; text-align: center; border-radius: 4px;
+	}
+	a.s3-final-btns:hover {background-color: #dfdfdf;}
+	div.s3-gopro-btn {text-align:center; font-size:14px; margin:auto; width:200px; font-style: italic}
 
 	/* ============================
 	BUTTONS */	
-	div.dup-footer-buttons {position:absolute; bottom:10px; padding:10px; width:100%; text-align:right;}
+	div.dup-footer-buttons {padding:10px; width:100%; text-align:right;}
 	div.dup-footer-buttons  input, button {
 		color:#000; font-size:12px; border-radius:5px;	padding:6px 8px 4px 8px; border:1px solid #999;
 		background-color:#F1F1F1;
@@ -1901,25 +2179,20 @@ die(json_encode($JSON));
 	.top_goodPass{background:#ffffe0; border:1px solid #e6db55;	display:block;}
 	.top_strongPass{background:#d3edab;	border:1px solid #73bc00; display:block;}
 
-	/* ============================
-	CUSTOME OVERIDE */
-	/*Hide X button on close dialog*/
-	div.ui-dialog-titlebar button.ui-dialog-titlebar-close {display:none !important}
-	
+
 	/*================================================
 	PARSLEY:Overrides*/
-	input.parsley-error, textarea.parsley-error {
+	input.parsley-error, textarea.parsley-error, select.parsley-error {
 	  color:#B94A48 !important;
 	  background-color:#F2DEDE !important;
 	  border:1px solid #EED3D7 !important;
 	}
-	ul.parsley-error-list {margin:1px 0 0 -40px; list-style-type:none; font-size:10px}
+	ul.parsley-errors-list {margin:1px 0 0 -40px; list-style-type:none; font-size:10px}
 </style>	
 	<?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
@@ -1927,7 +2200,7 @@ die(json_encode($JSON));
 ?>
 <!-- ========================================
 JQUERY ASSETS -->
-<?php if(DupUtil::is_url_active("ajax.googleapis.com", 443) ): ?>
+<?php if(DUPX_Util::is_url_active("ajax.googleapis.com", 443) ): ?>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 <?php else: ?>
@@ -1948,7 +2221,7 @@ JQUERY ASSETS -->
 	
 <!-- ========================================
 KNOCKOUT ASSETS -->
-<?php if( DupUtil::is_url_active("ajax.aspnetcdn.com", 443) ): ?>
+<?php if( DUPX_Util::is_url_active("ajax.aspnetcdn.com", 443) ): ?>
 	<script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <?php else: ?>
 	<script type="text/javascript">
@@ -2083,53 +2356,21 @@ for(var c=0;c<f.length;c++){var e=true;for(var b=0;b<a&&(b+c+a)<f.length;b++){e=
 
 
 <script type="text/javascript">
-/* Parsley dist/parsley.min.js build version 1.2.2 http://parsleyjs.org */
-!function(d){var h=function(a){this.messages={defaultMessage:"This value seems to be invalid.",type:{email:"This value should be a valid email.",url:"This value should be a valid url.",urlstrict:"This value should be a valid url.",number:"This value should be a valid number.",digits:"This value should be digits.",dateIso:"This value should be a valid date (YYYY-MM-DD).",alphanum:"This value should be alphanumeric.",phone:"This value should be a valid phone number."},notnull:"This value should not be null.",
-notblank:"This value should not be blank.",required:"This value is required.",regexp:"This value seems to be invalid.",min:"This value should be greater than or equal to %s.",max:"This value should be lower than or equal to %s.",range:"This value should be between %s and %s.",minlength:"This value is too short. It should have %s characters or more.",maxlength:"This value is too long. It should have %s characters or less.",rangelength:"This value length is invalid. It should be between %s and %s characters long.",
-mincheck:"You must select at least %s choices.",maxcheck:"You must select %s choices or less.",rangecheck:"You must select between %s and %s choices.",equalto:"This value should be the same."};this.init(a)};h.prototype={constructor:h,validators:{notnull:function(){return{validate:function(a){return 0<a.length},priority:2}},notblank:function(){return{validate:function(a){return"string"===typeof a&&""!==a.replace(/^\s+/g,"").replace(/\s+$/g,"")},priority:2}},required:function(){var a=this;return{validate:function(b){if("object"===
-typeof b){for(var c in b)if(a.required().validate(b[c]))return!0;return!1}return a.notnull().validate(b)&&a.notblank().validate(b)},priority:512}},type:function(){return{validate:function(a,b){var c;switch(b){case "number":c=/^-?(?:\d+|\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/;break;case "digits":c=/^\d+$/;break;case "alphanum":c=/^\w+$/;break;case "email":c=/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))){2,6}$/i;
-break;case "url":a=/(https?|s?ftp|git)/i.test(a)?a:"http://"+a;case "urlstrict":c=/^(https?|s?ftp|git):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
-break;case "dateIso":c=/^(\d{4})\D?(0[1-9]|1[0-2])\D?([12]\d|0[1-9]|3[01])$/;break;case "phone":c=/^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,5})|(\(?\d{2,6}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;break;default:return!1}return""!==a?c.test(a):!1},priority:256}},regexp:function(){return{validate:function(a,b,c){return RegExp(b,c.options.regexpFlag||"").test(a)},priority:64}},minlength:function(){return{validate:function(a,b){return a.length>=b},priority:32}},maxlength:function(){return{validate:function(a,
-b){return a.length<=b},priority:32}},rangelength:function(){var a=this;return{validate:function(b,c){return a.minlength().validate(b,c[0])&&a.maxlength().validate(b,c[1])},priority:32}},min:function(){return{validate:function(a,b){return Number(a)>=b},priority:32}},max:function(){return{validate:function(a,b){return Number(a)<=b},priority:32}},range:function(){var a=this;return{validate:function(b,c){return a.min().validate(b,c[0])&&a.max().validate(b,c[1])},priority:32}},equalto:function(){return{validate:function(a,
-b,c){c.options.validateIfUnchanged=!0;return a===d(b).val()},priority:64}},remote:function(){return{validate:function(a,b,c){var e={},f={};e[c.$element.attr("name")]=a;"undefined"!==typeof c.options.remoteDatatype&&(f={dataType:c.options.remoteDatatype});var g=function(a,b){"undefined"!==typeof b&&("undefined"!==typeof c.Validator.messages.remote&&b!==c.Validator.messages.remote)&&d(c.UI.ulError+" .remote").remove();if(!1===a)c.options.listeners.onFieldError(c.element,c.constraints,c);else!0===a&&
-!1===c.options.listeners.onFieldSuccess(c.element,c.constraints,c)&&(a=!1);c.updtConstraint({name:"remote",valid:a},b);c.manageValidationResult()},k=function(a){if("object"===typeof a)return a;try{a=d.parseJSON(a)}catch(b){}return a},l=function(a){return"object"===typeof a&&null!==a?"undefined"!==typeof a.error?a.error:"undefined"!==typeof a.message?a.message:null:null};d.ajax(d.extend({},{url:b,data:e,type:c.options.remoteMethod||"GET",success:function(a){a=k(a);g(1===a||!0===a||"object"===typeof a&&
-null!==a&&"undefined"!==typeof a.success,l(a))},error:function(a){a=k(a);g(!1,l(a))}},f));return null},priority:64}},mincheck:function(){var a=this;return{validate:function(b,c){return a.minlength().validate(b,c)},priority:32}},maxcheck:function(){var a=this;return{validate:function(b,c){return a.maxlength().validate(b,c)},priority:32}},rangecheck:function(){var a=this;return{validate:function(b,c){return a.rangelength().validate(b,c)},priority:32}}},init:function(a){var b=a.validators;a=a.messages;
-for(var c in b)this.addValidator(c,b[c]);for(c in a)this.addMessage(c,a[c])},formatMesssage:function(a,b){if("object"===typeof b){for(var c in b)a=this.formatMesssage(a,b[c]);return a}return"string"===typeof a?a.replace(/%s/i,b):""},addValidator:function(a,b){if("undefined"===typeof b().validate)throw Error("Validator `"+a+"` must have a validate method. See more here: http://parsleyjs.org/documentation.html#javascript-general");"undefined"===typeof b().priority&&(b={validate:b().validate,priority:32},
-window.console&&window.console.warn&&window.console.warn("Validator `"+a+"` should have a priority. Default priority 32 given"));this.validators[a]=b},addMessage:function(a,b,c){if("undefined"!==typeof c&&!0===c)this.messages.type[a]=b;else if("type"===a)for(var d in b)this.messages.type[d]=b[d];else this.messages[a]=b}};var n=function(a){this.init(a)};n.prototype={constructor:n,init:function(a){this.ParsleyInstance=a;this.hash=a.hash;this.options=this.ParsleyInstance.options;this.errorClassHandler=
-this.options.errors.classHandler(this.ParsleyInstance.element,this.ParsleyInstance.isRadioOrCheckbox)||this.ParsleyInstance.$element;this.ulErrorManagement()},ulErrorManagement:function(){this.ulError="#"+this.hash;this.ulTemplate=d(this.options.errors.errorsWrapper).attr("id",this.hash).addClass("parsley-error-list")},removeError:function(a){a=this.ulError+" ."+a;var b=this;this.options.animate?d(a).fadeOut(this.options.animateDuration,function(){d(this).remove();b.ulError&&0===d(b.ulError).children().length&&
-b.removeErrors()}):d(a).remove()},addError:function(a){for(var b in a){var c=d(this.options.errors.errorElem).addClass(b);d(this.ulError).append(this.options.animate?d(c).html(a[b]).hide().fadeIn(this.options.animateDuration):d(c).html(a[b]))}},removeErrors:function(){this.options.animate?d(this.ulError).fadeOut(this.options.animateDuration,function(){d(this).remove()}):d(this.ulError).remove()},reset:function(){this.ParsleyInstance.valid=null;this.removeErrors();this.ParsleyInstance.validatedOnce=
-!1;this.errorClassHandler.removeClass(this.options.successClass).removeClass(this.options.errorClass);for(var a in this.constraints)this.constraints[a].valid=null;return this},manageError:function(a){d(this.ulError).length||this.manageErrorContainer();if(!("required"===a.name&&null!==this.ParsleyInstance.getVal()&&0<this.ParsleyInstance.getVal().length))if(this.ParsleyInstance.isRequired&&"required"!==a.name&&(null===this.ParsleyInstance.getVal()||0===this.ParsleyInstance.getVal().length))this.removeError(a.name);
-else{var b=a.name,c=!1!==this.options.errorMessage?"custom-error-message":b,e={};a=!1!==this.options.errorMessage?this.options.errorMessage:"type"===a.name?this.ParsleyInstance.Validator.messages[b][a.requirements]:"undefined"===typeof this.ParsleyInstance.Validator.messages[b]?this.ParsleyInstance.Validator.messages.defaultMessage:this.ParsleyInstance.Validator.formatMesssage(this.ParsleyInstance.Validator.messages[b],a.requirements);d(this.ulError+" ."+c).length||(e[c]=a,this.addError(e))}},manageErrorContainer:function(){var a=
-this.options.errorContainer||this.options.errors.container(this.ParsleyInstance.element,this.ParsleyInstance.isRadioOrCheckbox),b=this.options.animate?this.ulTemplate.css("display",""):this.ulTemplate;"undefined"!==typeof a?d(a).append(b):!this.ParsleyInstance.isRadioOrCheckbox?this.ParsleyInstance.$element.after(b):this.ParsleyInstance.$element.parent().after(b)}};var m=function(a,b,c){this.options=b;if("ParsleyFieldMultiple"===c)return this;this.init(a,c||"ParsleyField")};m.prototype={constructor:m,
-init:function(a,b){this.type=b;this.valid=!0;this.element=a;this.validatedOnce=!1;this.$element=d(a);this.val=this.$element.val();this.Validator=new h(this.options);this.isRequired=!1;this.constraints={};"undefined"===typeof this.isRadioOrCheckbox&&(this.isRadioOrCheckbox=!1,this.hash=this.generateHash());this.UI=new n(this);this.bindHtml5Constraints();this.addConstraints();this.hasConstraints()&&this.bindValidationEvents()},setParent:function(a){this.$parent=d(a)},getParent:function(){return this.$parent},
-bindHtml5Constraints:function(){if(this.$element.hasClass("required")||this.$element.attr("required"))this.options.required=!0;var a=this.$element.attr("type");"undefined"!==typeof a&&RegExp(a,"i").test("email url number range tel")&&(this.options.type="tel"===a?"phone":a,RegExp(this.options.type,"i").test("number range")&&(this.options.type="number","undefined"!==typeof this.$element.attr("min")&&this.$element.attr("min").length&&(this.options.min=this.$element.attr("min")),"undefined"!==typeof this.$element.attr("max")&&
-this.$element.attr("max").length&&(this.options.max=this.$element.attr("max"))));"string"===typeof this.$element.attr("pattern")&&this.$element.attr("pattern").length&&(this.options.regexp=this.$element.attr("pattern"))},addConstraints:function(){for(var a in this.options){var b={};b[a]=this.options[a];this.addConstraint(b,!0,!1)}},addConstraint:function(a,b,c){for(var d in a)d=d.toLowerCase(),"function"===typeof this.Validator.validators[d]&&(this.constraints[d]={name:d,requirements:a[d],valid:null},
-"required"===d&&(this.isRequired=!0),this.addCustomConstraintMessage(d));"undefined"===typeof b&&this.bindValidationEvents()},updateConstraint:function(a,b){for(var c in a)this.updtConstraint({name:c,requirements:a[c],valid:null},b)},updtConstraint:function(a,b){this.constraints[a.name]=d.extend(!0,this.constraints[a.name],a);"string"===typeof b&&(this.Validator.messages[a.name]=b);this.bindValidationEvents()},removeConstraint:function(a){a=a.toLowerCase();delete this.constraints[a];"required"===
-a&&(this.isRequired=!1);this.hasConstraints()?this.bindValidationEvents():this.UI.reset()},addCustomConstraintMessage:function(a){var b=a+("type"===a&&"undefined"!==typeof this.options[a]?this.options[a].charAt(0).toUpperCase()+this.options[a].substr(1):"")+"Message";"undefined"!==typeof this.options[b]&&this.Validator.addMessage("type"===a?this.options[a]:a,this.options[b],"type"===a)},bindValidationEvents:function(){this.valid=null;this.$element.addClass("parsley-validated");this.$element.off("."+
-this.type);this.options.remote&&!/change/i.test(this.options.trigger)&&(this.options.trigger=!this.options.trigger?"change":" change");var a=(!this.options.trigger?"":this.options.trigger)+(/key/i.test(this.options.trigger)?"":" keyup");this.$element.is("select")&&(a+=/change/i.test(a)?"":" change");a=a.replace(/^\s+/g,"").replace(/\s+$/g,"");this.$element.on((a+" ").split(" ").join("."+this.type+" "),!1,d.proxy(this.eventValidation,this))},generateHash:function(){return"parsley-"+(Math.random()+
-"").substring(2)},getHash:function(){return this.hash},getVal:function(){return"undefined"!==typeof this.$element.domApi(this.options.namespace).value?this.$element.domApi(this.options.namespace).value:this.$element.val()},eventValidation:function(a){var b=this.getVal();if("keyup"===a.type&&!/keyup/i.test(this.options.trigger)&&!this.validatedOnce||"change"===a.type&&!/change/i.test(this.options.trigger)&&!this.validatedOnce||!this.isRadioOrCheckbox&&this.getLength(b)<this.options.validationMinlength&&
-!this.validatedOnce)return!0;this.validate()},getLength:function(a){return!a||!a.hasOwnProperty("length")?0:a.length},isValid:function(){return this.validate(!1)},hasConstraints:function(){for(var a in this.constraints)return!0;return!1},validate:function(a){var b=this.getVal(),c=null;if(!this.hasConstraints()||this.$element.is(this.options.excluded))return null;if(this.options.listeners.onFieldValidate(this.element,this)||""===b&&!this.isRequired)return this.UI.reset(),null;if(!this.needsValidation(b))return this.valid;
-c=this.applyValidators();("undefined"!==typeof a?a:this.options.showErrors)&&this.manageValidationResult();return c},needsValidation:function(a){if(!this.options.validateIfUnchanged&&null!==this.valid&&this.val===a&&this.validatedOnce)return!1;this.val=a;return this.validatedOnce=!0},applyValidators:function(){var a=null,b;for(b in this.constraints){var c=this.Validator.validators[this.constraints[b].name]().validate(this.val,this.constraints[b].requirements,this);!1===c?(a=!1,this.constraints[b].valid=
-a):!0===c&&(this.constraints[b].valid=!0,a=!1!==a)}if(!1===a)this.options.listeners.onFieldError(this.element,this.constraints,this);else!0===a&&!1===this.options.listeners.onFieldSuccess(this.element,this.constraints,this)&&(a=!1);return a},manageValidationResult:function(){var a=null,b=[],c;for(c in this.constraints)!1===this.constraints[c].valid?(b.push(this.constraints[c]),a=!1):!0===this.constraints[c].valid&&(this.UI.removeError(this.constraints[c].name),a=!1!==a);this.valid=a;if(!0===this.valid)return this.UI.removeErrors(),
-this.UI.errorClassHandler.removeClass(this.options.errorClass).addClass(this.options.successClass),!0;if(!1===this.valid){if(!0===this.options.priorityEnabled){for(var a=0,e,f=0;f<b.length;f++)e=this.Validator.validators[b[f].name]().priority,e>a&&(c=b[f],a=e);this.UI.manageError(c)}else for(f=0;f<b.length;f++)this.UI.manageError(b[f]);this.UI.errorClassHandler.removeClass(this.options.successClass).addClass(this.options.errorClass);return!1}this.UI.ulError&&0===d(this.ulError).children().length&&
-this.UI.removeErrors();return a},addListener:function(a){for(var b in a)this.options.listeners[b]=a[b]},destroy:function(){this.$element.removeClass("parsley-validated");this.UI.reset();this.$element.off("."+this.type).removeData(this.type)}};var p=function(a,b,c){this.initMultiple(a,b);this.inherit(a,b);this.Validator=new h(b);this.init(a,c||"ParsleyFieldMultiple")};p.prototype={constructor:p,initMultiple:function(a,b){this.element=a;this.$element=d(a);this.group=b.group||!1;this.hash=this.getName();
-this.siblings=this.group?'[parsley-group="'+this.group+'"]':'input[name="'+this.$element.attr("name")+'"]';this.isRadioOrCheckbox=!0;this.isRadio=this.$element.is("input[type=radio]");this.isCheckbox=this.$element.is("input[type=checkbox]");this.errorClassHandler=b.errors.classHandler(a,this.isRadioOrCheckbox)||this.$element.parent()},inherit:function(a,b){var c=new m(a,b,"ParsleyFieldMultiple"),d;for(d in c)"undefined"===typeof this[d]&&(this[d]=c[d])},getName:function(){if(this.group)return"parsley-"+
-this.group;if("undefined"===typeof this.$element.attr("name"))throw"A radio / checkbox input must have a parsley-group attribute or a name to be Parsley validated !";return"parsley-"+this.$element.attr("name").replace(/(:|\.|\[|\])/g,"")},getVal:function(){if(this.isRadio)return d(this.siblings+":checked").val()||"";if(this.isCheckbox){var a=[];d(this.siblings+":checked").each(function(){a.push(d(this).val())});return a}},bindValidationEvents:function(){this.valid=null;this.$element.addClass("parsley-validated");
-this.$element.off("."+this.type);var a=this,b=(!this.options.trigger?"":this.options.trigger)+(/change/i.test(this.options.trigger)?"":" change"),b=b.replace(/^\s+/g,"").replace(/\s+$/g,"");d(this.siblings).each(function(){d(this).on(b.split(" ").join("."+a.type+" "),!1,d.proxy(a.eventValidation,a))})}};var q=function(a,b,c){this.init(a,b,c||"parsleyForm")};q.prototype={constructor:q,init:function(a,b,c){this.type=c;this.items=[];this.$element=d(a);this.options=b;var e=this;this.$element.find(b.inputs).each(function(){e.addItem(this)});
-this.$element.on("submit."+this.type,!1,d.proxy(this.validate,this))},addListener:function(a){for(var b in a)if(/Field/.test(b))for(var c=0;c<this.items.length;c++)this.items[c].addListener(a);else this.options.listeners[b]=a[b]},addItem:function(a){if(d(a).is(this.options.excluded))return!1;a=d(a).parsley(this.options);a.setParent(this);this.items.push(a)},removeItem:function(a){a=d(a).parsley();for(var b=0;b<this.items.length;b++)if(this.items[b].hash===a.hash)return this.items[b].destroy(),this.items.splice(b,
-1),!0;return!1},validate:function(a){var b=!0;this.focusedField=!1;for(var c=0;c<this.items.length;c++)if("undefined"!==typeof this.items[c]&&!1===this.items[c].validate()&&(b=!1,!this.focusedField&&"first"===this.options.focus||"last"===this.options.focus))this.focusedField=this.items[c].$element;if(this.focusedField&&!b)if(0<this.options.scrollDuration){var e=this,c=this.focusedField.offset().top-d(window).height()/2;d("html, body").animate({scrollTop:c},this.options.scrollDuration,function(){e.focusedField.focus()})}else this.focusedField.focus();
-a=this.options.listeners.onFormValidate(b,a,this);return"undefined"!==typeof a?a:b},isValid:function(){for(var a=0;a<this.items.length;a++)if(!1===this.items[a].isValid())return!1;return!0},removeErrors:function(){for(var a=0;a<this.items.length;a++)this.items[a].parsley("reset")},destroy:function(){for(var a=0;a<this.items.length;a++)this.items[a].destroy();this.$element.off("."+this.type).removeData(this.type)},reset:function(){for(var a=0;a<this.items.length;a++)this.items[a].UI.reset()}};d.fn.parsley=
-function(a,b){function c(b,c){var e=d(b).data(c);if(!e){switch(c){case "parsleyForm":e=new q(b,f,"parsleyForm");break;case "parsleyField":e=new m(b,f,"parsleyField");break;case "parsleyFieldMultiple":e=new p(b,f,"parsleyFieldMultiple");break;default:return}d(b).data(c,e)}return"string"===typeof a&&"function"===typeof e[a]?(e=e[a].apply(e,k),"undefined"!==typeof e?e:d(b)):e}var e=d(this).data("parsleyNamespace")?d(this).data("parsleyNamespace"):"undefined"!==typeof a&&"undefined"!==typeof a.namespace?
-a.namespace:d.fn.parsley.defaults.namespace,f=d.extend(!0,{},d.fn.parsley.defaults,"undefined"!==typeof window.ParsleyConfig?window.ParsleyConfig:{},a,this.domApi(e)),g=null,k=Array.prototype.slice.call(arguments,1);d(this).is("form")||"undefined"!==typeof d(this).domApi(e).bind?g=c(d(this),"parsleyForm"):d(this).is(f.inputs)&&(g=c(d(this),!d(this).is("input[type=radio], input[type=checkbox]")?"parsleyField":"parsleyFieldMultiple"));return"function"===typeof b?b():g};d(window).on("load",function(){d("[parsley-validate], [data-parsley-validate]").each(function(){d(this).parsley()})});
-d.fn.domApi=function(a){var b,c={},e=RegExp("^"+a,"i");if("undefined"===typeof this[0])return{};for(var f in this[0].attributes)if(b=this[0].attributes[f],null!==b&&b.specified&&e.test(b.name)){var g=c,k=r(b.name.replace(a,"")),l;b=b.value;var h=void 0;try{l=b?"true"==b||("false"==b?!1:"null"==b?null:!isNaN(h=Number(b))?h:/^[\[\{]/.test(b)?d.parseJSON(b):b):b}catch(m){l=b}g[k]=l}return c};var r=function(a){return a.replace(/-+(.)?/g,function(a,c){return c?c.toUpperCase():""})};d.fn.parsley.defaults=
-{namespace:"parsley-",inputs:"input, textarea, select",excluded:"input[type=hidden], input[type=file], :disabled",priorityEnabled:!0,trigger:!1,animate:!0,animateDuration:300,scrollDuration:500,focus:"first",validationMinlength:3,successClass:"parsley-success",errorClass:"parsley-error",errorMessage:!1,validators:{},showErrors:!0,messages:{},validateIfUnchanged:!1,errors:{classHandler:function(a,b){},container:function(a,b){},errorsWrapper:"<ul></ul>",errorElem:"<li></li>"},listeners:{onFieldValidate:function(a,
-b){return!1},onFormValidate:function(a,b,c){},onFieldError:function(a,b,c){},onFieldSuccess:function(a,b,c){}}}}(window.jQuery||window.Zepto);
+/*!
+* Parsley.js
+* Version 2.3.5 - built Sun, Feb 28th 2016, 6:25 am
+* http://parsleyjs.org
+* Guillaume Potier - <guillaume@wisembly.com>
+* Marc-Andre Lafortune - <petroselinum@marc-andre.ca>
+* MIT Licensed
+*/
+function _toConsumableArray(e){if(Array.isArray(e)){for(var t=0,i=Array(e.length);t<e.length;t++)i[t]=e[t];return i}return Array.from(e)}var _slice=Array.prototype.slice;!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t(require("jquery")):"function"==typeof define&&define.amd?define(["jquery"],t):e.parsley=t(e.jQuery)}(this,function(e){"use strict";function t(e,t){return e.parsleyAdaptedCallback||(e.parsleyAdaptedCallback=function(){var i=Array.prototype.slice.call(arguments,0);i.unshift(this),e.apply(t||A,i)}),e.parsleyAdaptedCallback}function i(e){return 0===e.lastIndexOf(D,0)?e.substr(D.length):e}var n=1,r={},s={attr:function(e,t,i){var n,r,s,a=new RegExp("^"+t,"i");if("undefined"==typeof i)i={};else for(n in i)i.hasOwnProperty(n)&&delete i[n];if("undefined"==typeof e||"undefined"==typeof e[0])return i;for(s=e[0].attributes,n=s.length;n--;)r=s[n],r&&r.specified&&a.test(r.name)&&(i[this.camelize(r.name.slice(t.length))]=this.deserializeValue(r.value));return i},checkAttr:function(e,t,i){return e.is("["+t+i+"]")},setAttr:function(e,t,i,n){e[0].setAttribute(this.dasherize(t+i),String(n))},generateID:function(){return""+n++},deserializeValue:function(t){var i;try{return t?"true"==t||("false"==t?!1:"null"==t?null:isNaN(i=Number(t))?/^[\[\{]/.test(t)?e.parseJSON(t):t:i):t}catch(n){return t}},camelize:function(e){return e.replace(/-+(.)?/g,function(e,t){return t?t.toUpperCase():""})},dasherize:function(e){return e.replace(/::/g,"/").replace(/([A-Z]+)([A-Z][a-z])/g,"$1_$2").replace(/([a-z\d])([A-Z])/g,"$1_$2").replace(/_/g,"-").toLowerCase()},warn:function(){var e;window.console&&"function"==typeof window.console.warn&&(e=window.console).warn.apply(e,arguments)},warnOnce:function(e){r[e]||(r[e]=!0,this.warn.apply(this,arguments))},_resetWarnings:function(){r={}},trimString:function(e){return e.replace(/^\s+|\s+$/g,"")},namespaceEvents:function(t,i){return t=this.trimString(t||"").split(/\s+/),t[0]?e.map(t,function(e){return e+"."+i}).join(" "):""},objectCreate:Object.create||function(){var e=function(){};return function(t){if(arguments.length>1)throw Error("Second argument not supported");if("object"!=typeof t)throw TypeError("Argument must be an object");e.prototype=t;var i=new e;return e.prototype=null,i}}()},a=s,o={namespace:"data-parsley-",inputs:"input, textarea, select",excluded:"input[type=button], input[type=submit], input[type=reset], input[type=hidden]",priorityEnabled:!0,multiple:null,group:null,uiEnabled:!0,validationThreshold:3,focus:"first",trigger:!1,triggerAfterFailure:"input",errorClass:"parsley-error",successClass:"parsley-success",classHandler:function(e){},errorsContainer:function(e){},errorsWrapper:'<ul class="parsley-errors-list"></ul>',errorTemplate:"<li></li>"},l=function(){};l.prototype={asyncSupport:!0,actualizeOptions:function(){return a.attr(this.$element,this.options.namespace,this.domOptions),this.parent&&this.parent.actualizeOptions&&this.parent.actualizeOptions(),this},_resetOptions:function(e){this.domOptions=a.objectCreate(this.parent.options),this.options=a.objectCreate(this.domOptions);for(var t in e)e.hasOwnProperty(t)&&(this.options[t]=e[t]);this.actualizeOptions()},_listeners:null,on:function(e,t){this._listeners=this._listeners||{};var i=this._listeners[e]=this._listeners[e]||[];return i.push(t),this},subscribe:function(t,i){e.listenTo(this,t.toLowerCase(),i)},off:function(e,t){var i=this._listeners&&this._listeners[e];if(i)if(t)for(var n=i.length;n--;)i[n]===t&&i.splice(n,1);else delete this._listeners[e];return this},unsubscribe:function(t,i){e.unsubscribeTo(this,t.toLowerCase())},trigger:function(e,t,i){t=t||this;var n,r=this._listeners&&this._listeners[e];if(r)for(var s=r.length;s--;)if(n=r[s].call(t,t,i),n===!1)return n;return this.parent?this.parent.trigger(e,t,i):!0},reset:function(){if("ParsleyForm"!==this.__class__)return this._resetUI(),this._trigger("reset");for(var e=0;e<this.fields.length;e++)this.fields[e].reset();this._trigger("reset")},destroy:function(){if(this._destroyUI(),"ParsleyForm"!==this.__class__)return this.$element.removeData("Parsley"),this.$element.removeData("ParsleyFieldMultiple"),void this._trigger("destroy");for(var e=0;e<this.fields.length;e++)this.fields[e].destroy();this.$element.removeData("Parsley"),this._trigger("destroy")},asyncIsValid:function(e,t){return a.warnOnce("asyncIsValid is deprecated; please use whenValid instead"),this.whenValid({group:e,force:t})},_findRelated:function(){return this.options.multiple?this.parent.$element.find("["+this.options.namespace+'multiple="'+this.options.multiple+'"]'):this.$element}};var u={string:function(e){return e},integer:function(e){if(isNaN(e))throw'Requirement is not an integer: "'+e+'"';return parseInt(e,10)},number:function(e){if(isNaN(e))throw'Requirement is not a number: "'+e+'"';return parseFloat(e)},reference:function(t){var i=e(t);if(0===i.length)throw'No such reference: "'+t+'"';return i},"boolean":function(e){return"false"!==e},object:function(e){return a.deserializeValue(e)},regexp:function(e){var t="";return/^\/.*\/(?:[gimy]*)$/.test(e)?(t=e.replace(/.*\/([gimy]*)$/,"$1"),e=e.replace(new RegExp("^/(.*?)/"+t+"$"),"$1")):e="^"+e+"$",new RegExp(e,t)}},d=function(e,t){var i=e.match(/^\s*\[(.*)\]\s*$/);if(!i)throw'Requirement is not an array: "'+e+'"';var n=i[1].split(",").map(a.trimString);if(n.length!==t)throw"Requirement has "+n.length+" values when "+t+" are needed";return n},h=function(e,t){var i=u[e||"string"];if(!i)throw'Unknown requirement specification: "'+e+'"';return i(t)},p=function(e,t,i){var n=null,r={};for(var s in e)if(s){var a=i(s);"string"==typeof a&&(a=h(e[s],a)),r[s]=a}else n=h(e[s],t);return[n,r]},f=function(t){e.extend(!0,this,t)};f.prototype={validate:function(t,i){if(this.fn)return arguments.length>3&&(i=[].slice.call(arguments,1,-1)),this.fn.call(this,t,i);if(e.isArray(t)){if(!this.validateMultiple)throw"Validator `"+this.name+"` does not handle multiple values";return this.validateMultiple.apply(this,arguments)}if(this.validateNumber)return isNaN(t)?!1:(arguments[0]=parseFloat(arguments[0]),this.validateNumber.apply(this,arguments));if(this.validateString)return this.validateString.apply(this,arguments);throw"Validator `"+this.name+"` only handles multiple values"},parseRequirements:function(t,i){if("string"!=typeof t)return e.isArray(t)?t:[t];var n=this.requirementType;if(e.isArray(n)){for(var r=d(t,n.length),s=0;s<r.length;s++)r[s]=h(n[s],r[s]);return r}return e.isPlainObject(n)?p(n,t,i):[h(n,t)]},requirementType:"string",priority:2};var c=function(e,t){this.__class__="ParsleyValidatorRegistry",this.locale="en",this.init(e||{},t||{})},m={email:/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,number:/^-?(\d*\.)?\d+(e[-+]?\d+)?$/i,integer:/^-?\d+$/,digits:/^\d+$/,alphanum:/^\w+$/i,url:new RegExp("^(?:(?:https?|ftp)://)?(?:\\S+(?::\\S*)?@)?(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))(?::\\d{2,5})?(?:/\\S*)?$","i")};m.range=m.number;var g=function(e){var t=(""+e).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);return t?Math.max(0,(t[1]?t[1].length:0)-(t[2]?+t[2]:0)):0};c.prototype={init:function(t,i){this.catalog=i,this.validators=e.extend({},this.validators);for(var n in t)this.addValidator(n,t[n].fn,t[n].priority);window.Parsley.trigger("parsley:validator:init")},setLocale:function(e){if("undefined"==typeof this.catalog[e])throw new Error(e+" is not available in the catalog");return this.locale=e,this},addCatalog:function(e,t,i){return"object"==typeof t&&(this.catalog[e]=t),!0===i?this.setLocale(e):this},addMessage:function(e,t,i){return"undefined"==typeof this.catalog[e]&&(this.catalog[e]={}),this.catalog[e][t]=i,this},addMessages:function(e,t){for(var i in t)this.addMessage(e,i,t[i]);return this},addValidator:function(e,t,i){if(this.validators[e])a.warn('Validator "'+e+'" is already defined.');else if(o.hasOwnProperty(e))return void a.warn('"'+e+'" is a restricted keyword and is not a valid validator name.');return this._setValidator.apply(this,arguments)},updateValidator:function(e,t,i){return this.validators[e]?this._setValidator(this,arguments):(a.warn('Validator "'+e+'" is not already defined.'),this.addValidator.apply(this,arguments))},removeValidator:function(e){return this.validators[e]||a.warn('Validator "'+e+'" is not defined.'),delete this.validators[e],this},_setValidator:function(e,t,i){"object"!=typeof t&&(t={fn:t,priority:i}),t.validate||(t=new f(t)),this.validators[e]=t;for(var n in t.messages||{})this.addMessage(n,e,t.messages[n]);return this},getErrorMessage:function(e){var t;if("type"===e.name){var i=this.catalog[this.locale][e.name]||{};t=i[e.requirements]}else t=this.formatMessage(this.catalog[this.locale][e.name],e.requirements);return t||this.catalog[this.locale].defaultMessage||this.catalog.en.defaultMessage},formatMessage:function(e,t){if("object"==typeof t){for(var i in t)e=this.formatMessage(e,t[i]);return e}return"string"==typeof e?e.replace(/%s/i,t):""},validators:{notblank:{validateString:function(e){return/\S/.test(e)},priority:2},required:{validateMultiple:function(e){return e.length>0},validateString:function(e){return/\S/.test(e)},priority:512},type:{validateString:function(e,t){var i=arguments.length<=2||void 0===arguments[2]?{}:arguments[2],n=i.step,r=void 0===n?"1":n,s=i.base,a=void 0===s?0:s,o=m[t];if(!o)throw new Error("validator type `"+t+"` is not supported");if(!o.test(e))return!1;if("number"===t&&!/^any$/i.test(r||"")){var l=Number(e),u=Math.max(g(r),g(a));if(g(l)>u)return!1;var d=function(e){return Math.round(e*Math.pow(10,u))};if((d(l)-d(a))%d(r)!=0)return!1}return!0},requirementType:{"":"string",step:"string",base:"number"},priority:256},pattern:{validateString:function(e,t){return t.test(e)},requirementType:"regexp",priority:64},minlength:{validateString:function(e,t){return e.length>=t},requirementType:"integer",priority:30},maxlength:{validateString:function(e,t){return e.length<=t},requirementType:"integer",priority:30},length:{validateString:function(e,t,i){return e.length>=t&&e.length<=i},requirementType:["integer","integer"],priority:30},mincheck:{validateMultiple:function(e,t){return e.length>=t},requirementType:"integer",priority:30},maxcheck:{validateMultiple:function(e,t){return e.length<=t},requirementType:"integer",priority:30},check:{validateMultiple:function(e,t,i){return e.length>=t&&e.length<=i},requirementType:["integer","integer"],priority:30},min:{validateNumber:function(e,t){return e>=t},requirementType:"number",priority:30},max:{validateNumber:function(e,t){return t>=e},requirementType:"number",priority:30},range:{validateNumber:function(e,t,i){return e>=t&&i>=e},requirementType:["number","number"],priority:30},equalto:{validateString:function(t,i){var n=e(i);return n.length?t===n.val():t===i},priority:256}}};var y={},v=function T(e,t,i){for(var n=[],r=[],s=0;s<e.length;s++){for(var a=!1,o=0;o<t.length;o++)if(e[s].assert.name===t[o].assert.name){a=!0;break}a?r.push(e[s]):n.push(e[s])}return{kept:r,added:n,removed:i?[]:T(t,e,!0).added}};y.Form={_actualizeTriggers:function(){var e=this;this.$element.on("submit.Parsley",function(t){e.onSubmitValidate(t)}),this.$element.on("click.Parsley",'input[type="submit"], button[type="submit"]',function(t){e.onSubmitButton(t)}),!1!==this.options.uiEnabled&&this.$element.attr("novalidate","")},focus:function(){if(this._focusedField=null,!0===this.validationResult||"none"===this.options.focus)return null;for(var e=0;e<this.fields.length;e++){var t=this.fields[e];if(!0!==t.validationResult&&t.validationResult.length>0&&"undefined"==typeof t.options.noFocus&&(this._focusedField=t.$element,"first"===this.options.focus))break}return null===this._focusedField?null:this._focusedField.focus()},_destroyUI:function(){this.$element.off(".Parsley")}},y.Field={_reflowUI:function(){if(this._buildUI(),this._ui){var e=v(this.validationResult,this._ui.lastValidationResult);this._ui.lastValidationResult=this.validationResult,this._manageStatusClass(),this._manageErrorsMessages(e),this._actualizeTriggers(),!e.kept.length&&!e.added.length||this._failedOnce||(this._failedOnce=!0,this._actualizeTriggers())}},getErrorsMessages:function(){if(!0===this.validationResult)return[];for(var e=[],t=0;t<this.validationResult.length;t++)e.push(this.validationResult[t].errorMessage||this._getErrorMessage(this.validationResult[t].assert));return e},addError:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1],i=t.message,n=t.assert,r=t.updateClass,s=void 0===r?!0:r;this._buildUI(),this._addError(e,{message:i,assert:n}),s&&this._errorClass()},updateError:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1],i=t.message,n=t.assert,r=t.updateClass,s=void 0===r?!0:r;this._buildUI(),this._updateError(e,{message:i,assert:n}),s&&this._errorClass()},removeError:function(e){var t=arguments.length<=1||void 0===arguments[1]?{}:arguments[1],i=t.updateClass,n=void 0===i?!0:i;this._buildUI(),this._removeError(e),n&&this._manageStatusClass()},_manageStatusClass:function(){this.hasConstraints()&&this.needsValidation()&&!0===this.validationResult?this._successClass():this.validationResult.length>0?this._errorClass():this._resetClass()},_manageErrorsMessages:function(t){if("undefined"==typeof this.options.errorsMessagesDisabled){if("undefined"!=typeof this.options.errorMessage)return t.added.length||t.kept.length?(this._insertErrorWrapper(),0===this._ui.$errorsWrapper.find(".parsley-custom-error-message").length&&this._ui.$errorsWrapper.append(e(this.options.errorTemplate).addClass("parsley-custom-error-message")),this._ui.$errorsWrapper.addClass("filled").find(".parsley-custom-error-message").html(this.options.errorMessage)):this._ui.$errorsWrapper.removeClass("filled").find(".parsley-custom-error-message").remove();for(var i=0;i<t.removed.length;i++)this._removeError(t.removed[i].assert.name);for(i=0;i<t.added.length;i++)this._addError(t.added[i].assert.name,{message:t.added[i].errorMessage,assert:t.added[i].assert});for(i=0;i<t.kept.length;i++)this._updateError(t.kept[i].assert.name,{message:t.kept[i].errorMessage,assert:t.kept[i].assert})}},_addError:function(t,i){var n=i.message,r=i.assert;this._insertErrorWrapper(),this._ui.$errorsWrapper.addClass("filled").append(e(this.options.errorTemplate).addClass("parsley-"+t).html(n||this._getErrorMessage(r)))},_updateError:function(e,t){var i=t.message,n=t.assert;this._ui.$errorsWrapper.addClass("filled").find(".parsley-"+e).html(i||this._getErrorMessage(n))},_removeError:function(e){this._ui.$errorsWrapper.removeClass("filled").find(".parsley-"+e).remove()},_getErrorMessage:function(e){var t=e.name+"Message";return"undefined"!=typeof this.options[t]?window.Parsley.formatMessage(this.options[t],e.requirements):window.Parsley.getErrorMessage(e)},_buildUI:function(){if(!this._ui&&!1!==this.options.uiEnabled){var t={};this.$element.attr(this.options.namespace+"id",this.__id__),t.$errorClassHandler=this._manageClassHandler(),t.errorsWrapperId="parsley-id-"+(this.options.multiple?"multiple-"+this.options.multiple:this.__id__),t.$errorsWrapper=e(this.options.errorsWrapper).attr("id",t.errorsWrapperId),t.lastValidationResult=[],t.validationInformationVisible=!1,this._ui=t}},_manageClassHandler:function(){if("string"==typeof this.options.classHandler&&e(this.options.classHandler).length)return e(this.options.classHandler);var t=this.options.classHandler.call(this,this);return"undefined"!=typeof t&&t.length?t:!this.options.multiple||this.$element.is("select")?this.$element:this.$element.parent()},_insertErrorWrapper:function(){var t;if(0!==this._ui.$errorsWrapper.parent().length)return this._ui.$errorsWrapper.parent();if("string"==typeof this.options.errorsContainer){if(e(this.options.errorsContainer).length)return e(this.options.errorsContainer).append(this._ui.$errorsWrapper);a.warn("The errors container `"+this.options.errorsContainer+"` does not exist in DOM")}else"function"==typeof this.options.errorsContainer&&(t=this.options.errorsContainer.call(this,this));if("undefined"!=typeof t&&t.length)return t.append(this._ui.$errorsWrapper);var i=this.$element;return this.options.multiple&&(i=i.parent()),i.after(this._ui.$errorsWrapper)},_actualizeTriggers:function(){var e=this,t=this._findRelated();t.off(".Parsley"),this._failedOnce?t.on(a.namespaceEvents(this.options.triggerAfterFailure,"Parsley"),function(){e.validate()}):t.on(a.namespaceEvents(this.options.trigger,"Parsley"),function(t){e._eventValidate(t)})},_eventValidate:function(e){(!/key|input/.test(e.type)||this._ui&&this._ui.validationInformationVisible||!(this.getValue().length<=this.options.validationThreshold))&&this.validate()},_resetUI:function(){this._failedOnce=!1,this._actualizeTriggers(),"undefined"!=typeof this._ui&&(this._ui.$errorsWrapper.removeClass("filled").children().remove(),this._resetClass(),this._ui.lastValidationResult=[],this._ui.validationInformationVisible=!1)},_destroyUI:function(){this._resetUI(),"undefined"!=typeof this._ui&&this._ui.$errorsWrapper.remove(),delete this._ui},_successClass:function(){this._ui.validationInformationVisible=!0,this._ui.$errorClassHandler.removeClass(this.options.errorClass).addClass(this.options.successClass)},_errorClass:function(){this._ui.validationInformationVisible=!0,this._ui.$errorClassHandler.removeClass(this.options.successClass).addClass(this.options.errorClass)},_resetClass:function(){this._ui.$errorClassHandler.removeClass(this.options.successClass).removeClass(this.options.errorClass)}};var _=function(t,i,n){this.__class__="ParsleyForm",this.__id__=a.generateID(),this.$element=e(t),this.domOptions=i,this.options=n,this.parent=window.Parsley,this.fields=[],this.validationResult=null},w={pending:null,resolved:!0,rejected:!1};_.prototype={onSubmitValidate:function(e){var t=this;if(!0!==e.parsley){var i=this._$submitSource||this.$element.find('input[type="submit"], button[type="submit"]').first();if(this._$submitSource=null,this.$element.find(".parsley-synthetic-submit-button").prop("disabled",!0),!i.is("[formnovalidate]")){var n=this.whenValidate({event:e});"resolved"===n.state()&&!1!==this._trigger("submit")||(e.stopImmediatePropagation(),e.preventDefault(),"pending"===n.state()&&n.done(function(){t._submit(i)}))}}},onSubmitButton:function(t){this._$submitSource=e(t.target)},_submit:function(t){if(!1!==this._trigger("submit")){if(t){var i=this.$element.find(".parsley-synthetic-submit-button").prop("disabled",!1);0===i.length&&(i=e('<input class="parsley-synthetic-submit-button" type="hidden">').appendTo(this.$element)),i.attr({name:t.attr("name"),value:t.attr("value")})}this.$element.trigger(e.extend(e.Event("submit"),{parsley:!0}))}},validate:function(t){if(arguments.length>=1&&!e.isPlainObject(t)){a.warnOnce("Calling validate on a parsley form without passing arguments as an object is deprecated.");var i=_slice.call(arguments),n=i[0],r=i[1],s=i[2];t={group:n,force:r,event:s}}return w[this.whenValidate(t).state()]},whenValidate:function(){var t=this,i=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],n=i.group,r=i.force,s=i.event;this.submitEvent=s,s&&(this.submitEvent=e.extend({},s,{preventDefault:function(){a.warnOnce("Using `this.submitEvent.preventDefault()` is deprecated; instead, call `this.validationResult = false`"),t.validationResult=!1}})),this.validationResult=!0,this._trigger("validate"),this._refreshFields();var o=this._withoutReactualizingFormOptions(function(){return e.map(t.fields,function(e){return e.whenValidate({force:r,group:n})})}),l=function(){var i=e.Deferred();return!1===t.validationResult&&i.reject(),i.resolve().promise()};return e.when.apply(e,_toConsumableArray(o)).done(function(){t._trigger("success")}).fail(function(){t.validationResult=!1,t.focus(),t._trigger("error")}).always(function(){t._trigger("validated")}).pipe(l,l)},isValid:function(t){if(arguments.length>=1&&!e.isPlainObject(t)){a.warnOnce("Calling isValid on a parsley form without passing arguments as an object is deprecated.");var i=_slice.call(arguments),n=i[0],r=i[1];t={group:n,force:r}}return w[this.whenValid(t).state()]},whenValid:function(){var t=this,i=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],n=i.group,r=i.force;this._refreshFields();var s=this._withoutReactualizingFormOptions(function(){return e.map(t.fields,function(e){return e.whenValid({group:n,force:r})})});return e.when.apply(e,_toConsumableArray(s))},_refreshFields:function(){return this.actualizeOptions()._bindFields()},_bindFields:function(){var t=this,i=this.fields;return this.fields=[],this.fieldsMappedById={},this._withoutReactualizingFormOptions(function(){t.$element.find(t.options.inputs).not(t.options.excluded).each(function(e,i){var n=new window.Parsley.Factory(i,{},t);"ParsleyField"!==n.__class__&&"ParsleyFieldMultiple"!==n.__class__||!0===n.options.excluded||"undefined"==typeof t.fieldsMappedById[n.__class__+"-"+n.__id__]&&(t.fieldsMappedById[n.__class__+"-"+n.__id__]=n,t.fields.push(n))}),e(i).not(t.fields).each(function(e,t){t._trigger("reset")})}),this},_withoutReactualizingFormOptions:function(e){var t=this.actualizeOptions;this.actualizeOptions=function(){return this};var i=e();return this.actualizeOptions=t,i},_trigger:function(e){return this.trigger("form:"+e)}};var b=function(t,i,n,r,s){if(!/ParsleyField/.test(t.__class__))throw new Error("ParsleyField or ParsleyFieldMultiple instance expected");var a=window.Parsley._validatorRegistry.validators[i],o=new f(a);e.extend(this,{validator:o,name:i,requirements:n,priority:r||t.options[i+"Priority"]||o.priority,isDomConstraint:!0===s}),this._parseRequirements(t.options)},F=function(e){var t=e[0].toUpperCase();return t+e.slice(1)};b.prototype={validate:function(e,t){var i=this.requirementList.slice(0);return i.unshift(e),i.push(t),this.validator.validate.apply(this.validator,i)},_parseRequirements:function(e){var t=this;this.requirementList=this.validator.parseRequirements(this.requirements,function(i){return e[t.name+F(i)]})}};var C=function(t,i,n,r){this.__class__="ParsleyField",this.__id__=a.generateID(),this.$element=e(t),"undefined"!=typeof r&&(this.parent=r),this.options=n,this.domOptions=i,this.constraints=[],this.constraintsByName={},this.validationResult=[],this._bindConstraints()},$={pending:null,resolved:!0,rejected:!1};C.prototype={validate:function(t){arguments.length>=1&&!e.isPlainObject(t)&&(a.warnOnce("Calling validate on a parsley field without passing arguments as an object is deprecated."),t={options:t});var i=this.whenValidate(t);if(!i)return!0;switch(i.state()){case"pending":return null;case"resolved":return!0;case"rejected":return this.validationResult}},whenValidate:function(){var e=this,t=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],i=t.force,n=t.group;return this.refreshConstraints(),!n||this._isInGroup(n)?(this.value=this.getValue(),this._trigger("validate"),this.whenValid({force:i,value:this.value,_refreshed:!0}).always(function(){e._reflowUI()}).done(function(){e._trigger("success")}).fail(function(){e._trigger("error")}).always(function(){e._trigger("validated")})):void 0},hasConstraints:function(){return 0!==this.constraints.length},needsValidation:function(e){return"undefined"==typeof e&&(e=this.getValue()),e.length||this._isRequired()||"undefined"!=typeof this.options.validateIfEmpty?!0:!1},_isInGroup:function(t){return e.isArray(this.options.group)?-1!==e.inArray(t,this.options.group):this.options.group===t},isValid:function(t){if(arguments.length>=1&&!e.isPlainObject(t)){a.warnOnce("Calling isValid on a parsley field without passing arguments as an object is deprecated.");var i=_slice.call(arguments),n=i[0],r=i[1];t={force:n,value:r}}var s=this.whenValid(t);return s?$[s.state()]:!0},whenValid:function(){var t=this,i=arguments.length<=0||void 0===arguments[0]?{}:arguments[0],n=i.force,r=void 0===n?!1:n,s=i.value,a=i.group,o=i._refreshed;if(o||this.refreshConstraints(),!a||this._isInGroup(a)){if(this.validationResult=!0,!this.hasConstraints())return e.when();if(("undefined"==typeof s||null===s)&&(s=this.getValue()),!this.needsValidation(s)&&!0!==r)return e.when();var l=this._getGroupedConstraints(),u=[];return e.each(l,function(i,n){var r=e.when.apply(e,_toConsumableArray(e.map(n,function(e){return t._validateConstraint(s,e)})));return u.push(r),"rejected"===r.state()?!1:void 0}),e.when.apply(e,u)}},_validateConstraint:function(t,i){var n=this,r=i.validate(t,this);return!1===r&&(r=e.Deferred().reject()),e.when(r).fail(function(e){!0===n.validationResult&&(n.validationResult=[]),n.validationResult.push({assert:i,errorMessage:"string"==typeof e&&e})})},getValue:function(){var e;return e="function"==typeof this.options.value?this.options.value(this):"undefined"!=typeof this.options.value?this.options.value:this.$element.val(),"undefined"==typeof e||null===e?"":this._handleWhitespace(e)},refreshConstraints:function(){return this.actualizeOptions()._bindConstraints()},addConstraint:function(e,t,i,n){if(window.Parsley._validatorRegistry.validators[e]){var r=new b(this,e,t,i,n);"undefined"!==this.constraintsByName[r.name]&&this.removeConstraint(r.name),this.constraints.push(r),this.constraintsByName[r.name]=r}return this},removeConstraint:function(e){for(var t=0;t<this.constraints.length;t++)if(e===this.constraints[t].name){this.constraints.splice(t,1);break}return delete this.constraintsByName[e],this},updateConstraint:function(e,t,i){return this.removeConstraint(e).addConstraint(e,t,i)},_bindConstraints:function(){for(var e=[],t={},i=0;i<this.constraints.length;i++)!1===this.constraints[i].isDomConstraint&&(e.push(this.constraints[i]),t[this.constraints[i].name]=this.constraints[i]);this.constraints=e,this.constraintsByName=t;for(var n in this.options)this.addConstraint(n,this.options[n],void 0,!0);return this._bindHtml5Constraints()},_bindHtml5Constraints:function(){(this.$element.hasClass("required")||this.$element.attr("required"))&&this.addConstraint("required",!0,void 0,!0),"string"==typeof this.$element.attr("pattern")&&this.addConstraint("pattern",this.$element.attr("pattern"),void 0,!0),"undefined"!=typeof this.$element.attr("min")&&"undefined"!=typeof this.$element.attr("max")?this.addConstraint("range",[this.$element.attr("min"),this.$element.attr("max")],void 0,!0):"undefined"!=typeof this.$element.attr("min")?this.addConstraint("min",this.$element.attr("min"),void 0,!0):"undefined"!=typeof this.$element.attr("max")&&this.addConstraint("max",this.$element.attr("max"),void 0,!0),"undefined"!=typeof this.$element.attr("minlength")&&"undefined"!=typeof this.$element.attr("maxlength")?this.addConstraint("length",[this.$element.attr("minlength"),this.$element.attr("maxlength")],void 0,!0):"undefined"!=typeof this.$element.attr("minlength")?this.addConstraint("minlength",this.$element.attr("minlength"),void 0,!0):"undefined"!=typeof this.$element.attr("maxlength")&&this.addConstraint("maxlength",this.$element.attr("maxlength"),void 0,!0);var e=this.$element.attr("type");return"undefined"==typeof e?this:"number"===e?this.addConstraint("type",["number",{step:this.$element.attr("step"),base:this.$element.attr("min")||this.$element.attr("value")}],void 0,!0):/^(email|url|range)$/i.test(e)?this.addConstraint("type",e,void 0,!0):this},_isRequired:function(){return"undefined"==typeof this.constraintsByName.required?!1:!1!==this.constraintsByName.required.requirements},_trigger:function(e){return this.trigger("field:"+e)},_handleWhitespace:function(e){return!0===this.options.trimValue&&a.warnOnce('data-parsley-trim-value="true" is deprecated, please use data-parsley-whitespace="trim"'),"squish"===this.options.whitespace&&(e=e.replace(/\s{2,}/g," ")),("trim"===this.options.whitespace||"squish"===this.options.whitespace||!0===this.options.trimValue)&&(e=a.trimString(e)),e},_getGroupedConstraints:function(){if(!1===this.options.priorityEnabled)return[this.constraints];for(var e=[],t={},i=0;i<this.constraints.length;i++){var n=this.constraints[i].priority;t[n]||e.push(t[n]=[]),t[n].push(this.constraints[i])}return e.sort(function(e,t){return t[0].priority-e[0].priority}),e}};var x=C,P=function(){this.__class__="ParsleyFieldMultiple"};P.prototype={addElement:function(e){return this.$elements.push(e),this},refreshConstraints:function(){var t;if(this.constraints=[],this.$element.is("select"))return this.actualizeOptions()._bindConstraints(),this;for(var i=0;i<this.$elements.length;i++)if(e("html").has(this.$elements[i]).length){t=this.$elements[i].data("ParsleyFieldMultiple").refreshConstraints().constraints;for(var n=0;n<t.length;n++)this.addConstraint(t[n].name,t[n].requirements,t[n].priority,t[n].isDomConstraint)}else this.$elements.splice(i,1);return this},getValue:function(){if("function"==typeof this.options.value)value=this.options.value(this);else if("undefined"!=typeof this.options.value)return this.options.value;if(this.$element.is("input[type=radio]"))return this._findRelated().filter(":checked").val()||"";if(this.$element.is("input[type=checkbox]")){var t=[];return this._findRelated().filter(":checked").each(function(){t.push(e(this).val())}),t}return this.$element.is("select")&&null===this.$element.val()?[]:this.$element.val()},_init:function(){return this.$elements=[this.$element],this}};var E=function(t,i,n){this.$element=e(t);var r=this.$element.data("Parsley");if(r)return"undefined"!=typeof n&&r.parent===window.Parsley&&(r.parent=n,r._resetOptions(r.options)),r;if(!this.$element.length)throw new Error("You must bind Parsley on an existing element.");if("undefined"!=typeof n&&"ParsleyForm"!==n.__class__)throw new Error("Parent instance must be a ParsleyForm instance");return this.parent=n||window.Parsley,this.init(i)};E.prototype={init:function(e){return this.__class__="Parsley",this.__version__="2.3.5",this.__id__=a.generateID(),this._resetOptions(e),this.$element.is("form")||a.checkAttr(this.$element,this.options.namespace,"validate")&&!this.$element.is(this.options.inputs)?this.bind("parsleyForm"):this.isMultiple()?this.handleMultiple():this.bind("parsleyField")},isMultiple:function(){return this.$element.is("input[type=radio], input[type=checkbox]")||this.$element.is("select")&&"undefined"!=typeof this.$element.attr("multiple")},handleMultiple:function(){var t,i,n=this;if(this.options.multiple||("undefined"!=typeof this.$element.attr("name")&&this.$element.attr("name").length?this.options.multiple=t=this.$element.attr("name"):"undefined"!=typeof this.$element.attr("id")&&this.$element.attr("id").length&&(this.options.multiple=this.$element.attr("id"))),this.$element.is("select")&&"undefined"!=typeof this.$element.attr("multiple"))return this.options.multiple=this.options.multiple||this.__id__,this.bind("parsleyFieldMultiple");if(!this.options.multiple)return a.warn("To be bound by Parsley, a radio, a checkbox and a multiple select input must have either a name or a multiple option.",this.$element),this;this.options.multiple=this.options.multiple.replace(/(:|\.|\[|\]|\{|\}|\$)/g,""),
+"undefined"!=typeof t&&e('input[name="'+t+'"]').each(function(t,i){e(i).is("input[type=radio], input[type=checkbox]")&&e(i).attr(n.options.namespace+"multiple",n.options.multiple)});for(var r=this._findRelated(),s=0;s<r.length;s++)if(i=e(r.get(s)).data("Parsley"),"undefined"!=typeof i){this.$element.data("ParsleyFieldMultiple")||i.addElement(this.$element);break}return this.bind("parsleyField",!0),i||this.bind("parsleyFieldMultiple")},bind:function(t,i){var n;switch(t){case"parsleyForm":n=e.extend(new _(this.$element,this.domOptions,this.options),window.ParsleyExtend)._bindFields();break;case"parsleyField":n=e.extend(new x(this.$element,this.domOptions,this.options,this.parent),window.ParsleyExtend);break;case"parsleyFieldMultiple":n=e.extend(new x(this.$element,this.domOptions,this.options,this.parent),new P,window.ParsleyExtend)._init();break;default:throw new Error(t+"is not a supported Parsley type")}return this.options.multiple&&a.setAttr(this.$element,this.options.namespace,"multiple",this.options.multiple),"undefined"!=typeof i?(this.$element.data("ParsleyFieldMultiple",n),n):(this.$element.data("Parsley",n),n._actualizeTriggers(),n._trigger("init"),n)}};var V=e.fn.jquery.split(".");if(parseInt(V[0])<=1&&parseInt(V[1])<8)throw"The loaded version of jQuery is too old. Please upgrade to 1.8.x or better.";V.forEach||a.warn("Parsley requires ES5 to run properly. Please include https://github.com/es-shims/es5-shim");var M=e.extend(new l,{$element:e(document),actualizeOptions:null,_resetOptions:null,Factory:E,version:"2.3.5"});e.extend(x.prototype,y.Field,l.prototype),e.extend(_.prototype,y.Form,l.prototype),e.extend(E.prototype,l.prototype),e.fn.parsley=e.fn.psly=function(t){if(this.length>1){var i=[];return this.each(function(){i.push(e(this).parsley(t))}),i}return e(this).length?new E(this,t):void a.warn("You must bind Parsley on an existing element.")},"undefined"==typeof window.ParsleyExtend&&(window.ParsleyExtend={}),M.options=e.extend(a.objectCreate(o),window.ParsleyConfig),window.ParsleyConfig=M.options,window.Parsley=window.psly=M,window.ParsleyUtils=a;var O=window.Parsley._validatorRegistry=new c(window.ParsleyConfig.validators,window.ParsleyConfig.i18n);window.ParsleyValidator={},e.each("setLocale addCatalog addMessage addMessages getErrorMessage formatMessage addValidator updateValidator removeValidator".split(" "),function(t,i){window.Parsley[i]=e.proxy(O,i),window.ParsleyValidator[i]=function(){var e;return a.warnOnce("Accessing the method '"+i+"' through ParsleyValidator is deprecated. Simply call 'window.Parsley."+i+"(...)'"),(e=window.Parsley)[i].apply(e,arguments)}}),window.Parsley.UI=y,window.ParsleyUI={removeError:function(e,t,i){var n=!0!==i;return a.warnOnce("Accessing ParsleyUI is deprecated. Call 'removeError' on the instance directly. Please comment in issue 1073 as to your need to call this method."),e.removeError(t,{updateClass:n})},getErrorsMessages:function(e){return a.warnOnce("Accessing ParsleyUI is deprecated. Call 'getErrorsMessages' on the instance directly."),e.getErrorsMessages()}},e.each("addError updateError".split(" "),function(e,t){window.ParsleyUI[t]=function(e,i,n,r,s){var o=!0!==s;return a.warnOnce("Accessing ParsleyUI is deprecated. Call '"+t+"' on the instance directly. Please comment in issue 1073 as to your need to call this method."),e[t](i,{message:n,assert:r,updateClass:o})}}),/firefox/i.test(navigator.userAgent)&&e(document).on("change","select",function(t){e(t.target).trigger("input")}),!1!==window.ParsleyConfig.autoBind&&e(function(){e("[data-parsley-validate]").length&&e("[data-parsley-validate]").parsley()});var A=e({}),R=function(){a.warnOnce("Parsley's pubsub module is deprecated; use the 'on' and 'off' methods on parsley instances or window.Parsley")},D="parsley:";e.listen=function(e,n){var r;if(R(),"object"==typeof arguments[1]&&"function"==typeof arguments[2]&&(r=arguments[1],n=arguments[2]),"function"!=typeof n)throw new Error("Wrong parameters");window.Parsley.on(i(e),t(n,r))},e.listenTo=function(e,n,r){if(R(),!(e instanceof x||e instanceof _))throw new Error("Must give Parsley instance");if("string"!=typeof n||"function"!=typeof r)throw new Error("Wrong parameters");e.on(i(n),t(r))},e.unsubscribe=function(e,t){if(R(),"string"!=typeof e||"function"!=typeof t)throw new Error("Wrong arguments");window.Parsley.off(i(e),t.parsleyAdaptedCallback)},e.unsubscribeTo=function(e,t){if(R(),!(e instanceof x||e instanceof _))throw new Error("Must give Parsley instance");e.off(i(t))},e.unsubscribeAll=function(t){R(),window.Parsley.off(i(t)),e("form,input,textarea,select").each(function(){var n=e(this).data("Parsley");n&&n.off(i(t))})},e.emit=function(e,t){var n;R();var r=t instanceof x||t instanceof _,s=Array.prototype.slice.call(arguments,r?2:1);s.unshift(i(e)),r||(t=window.Parsley),(n=t).trigger.apply(n,_toConsumableArray(s))};e.extend(!0,M,{asyncValidators:{"default":{fn:function(e){return e.status>=200&&e.status<300},url:!1},reverse:{fn:function(e){return e.status<200||e.status>=300},url:!1}},addAsyncValidator:function(e,t,i,n){return M.asyncValidators[e]={fn:t,url:i||!1,options:n||{}},this}}),M.addValidator("remote",{requirementType:{"":"string",validator:"string",reverse:"boolean",options:"object"},validateString:function(t,i,n,r){var s,a,o={},l=n.validator||(!0===n.reverse?"reverse":"default");if("undefined"==typeof M.asyncValidators[l])throw new Error("Calling an undefined async validator: `"+l+"`");i=M.asyncValidators[l].url||i,i.indexOf("{value}")>-1?i=i.replace("{value}",encodeURIComponent(t)):o[r.$element.attr("name")||r.$element.attr("id")]=t;var u=e.extend(!0,n.options||{},M.asyncValidators[l].options);s=e.extend(!0,{},{url:i,data:o,type:"GET"},u),r.trigger("field:ajaxoptions",r,s),a=e.param(s),"undefined"==typeof M._remoteCache&&(M._remoteCache={});var d=M._remoteCache[a]=M._remoteCache[a]||e.ajax(s),h=function(){var t=M.asyncValidators[l].fn.call(r,d,i,n);return t||(t=e.Deferred().reject()),e.when(t)};return d.then(h,h)},priority:-1}),M.on("form:submit",function(){M._remoteCache={}}),window.ParsleyExtend.addAsyncValidator=function(){return ParsleyUtils.warnOnce("Accessing the method `addAsyncValidator` through an instance is deprecated. Simply call `Parsley.addAsyncValidator(...)`"),M.addAsyncValidator.apply(M,arguments)},M.addMessages("en",{defaultMessage:"This value seems to be invalid.",type:{email:"This value should be a valid email.",url:"This value should be a valid url.",number:"This value should be a valid number.",integer:"This value should be a valid integer.",digits:"This value should be digits.",alphanum:"This value should be alphanumeric."},notblank:"This value should not be blank.",required:"This value is required.",pattern:"This value seems to be invalid.",min:"This value should be greater than or equal to %s.",max:"This value should be lower than or equal to %s.",range:"This value should be between %s and %s.",minlength:"This value is too short. It should have %s characters or more.",maxlength:"This value is too long. It should have %s characters or fewer.",length:"This value length is invalid. It should be between %s and %s characters long.",mincheck:"You must select at least %s choices.",maxcheck:"You must select %s choices or fewer.",check:"You must select between %s and %s choices.",equalto:"This value should be the same."}),M.setLocale("en");var q=M;return q});
 </script>
 	<?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
@@ -2249,7 +2490,7 @@ b){return!1},onFormValidate:function(a,b,c){},onFieldError:function(a,b,c){},onF
 			<td style="white-space:nowrap">
 
 				<i style='font-size:11px; color:#999'>
-					version: <?php echo $GLOBALS['FW_DUPLICATOR_VERSION'] ?>&nbsp;&nbsp;<a href="installer.php?help=1" target="_blank">[Help]</a>
+					version: <?php echo $GLOBALS['FW_DUPLICATOR_VERSION'] ?>&nbsp;&nbsp;<a href="?help=1" target="_blank">[Help]</a>
 				</i> &nbsp;
 				
 			</td>
@@ -2267,21 +2508,21 @@ switch ($_POST['action_step']) {
 	?> <?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
 	}
 	//DETECT ARCHIVE FILES
-	$zip_file_name  = "No package file found";
-	$zip_file_count = 0;
-	foreach (glob("*.zip") as $filename) {
-		$zip_file_name = $filename;
-		$zip_file_count++;
-	}
-	if ($zip_file_count > 1) {
-		$zip_file_name = "Too many zip files in directory";
+	$zip_files = DUPX_Util::get_zip_files();
+	$zip_count = count($zip_files);
+	
+	if ($zip_count > 1) {
+		$zip_name = "Too many zip files in directory";
+	} else if ($zip_count == 1) {
+		$zip_name = $zip_files[0];
+	} else {
+		$zip_name  = "No package file found";
 	}
 	
 	$req01a = @is_writeable($GLOBALS["CURRENT_ROOT_PATH"]) 	? 'Pass' : 'Fail';
@@ -2292,7 +2533,7 @@ switch ($_POST['action_step']) {
 			$req01a = 'Fail';
 		}
 	}
-	$req01b   = ($zip_file_count == 1) ? 'Pass' : 'Fail';
+	$req01b   = ($zip_count == 1) ? 'Pass' : 'Fail';
 	$req01    = ($req01a == 'Pass' && $req01b == 'Pass') ? 'Pass' : 'Fail';
 	$safe_ini = strtolower(@ini_get('safe_mode'));
 	$req02    =  $safe_ini  != 'on' || $safe_ini != 'yes' || $safe_ini != 'true' || ini_get("safe_mode") != 1 ? 'Pass' : 'Fail';
@@ -2308,11 +2549,12 @@ switch ($_POST['action_step']) {
 	* Timeout (10000000 = 166 minutes) */
 	Duplicator.runDeployment = function() {
 		
-		var $form = $('#dup-step1-input-form');
-		$form.parsley('validate');
-		if (! $form.parsley('isValid')) {
-			return;
-		}
+        var $form = $('#dup-step1-input-form');
+        $form.parsley().validate();
+        if (!$form.parsley().isValid()) {
+            return;
+        }
+
 	
 		var msg =  "Continue installation with the following settings?\n\n";
 			msg += "Server: " + $("#dbhost").val() + "\nDatabase: " + $("#dbname").val() + "\n\n";
@@ -2342,7 +2584,7 @@ switch ($_POST['action_step']) {
 						$("#ajax-dbname").val($("#dbname").val());
 						$("#ajax-dbcharset").val($("#dbcharset").val());
 						$("#ajax-dbcollate").val($("#dbcollate").val());
-						$("#ajax-logging").val($("#logging").val());
+						$("#ajax-logging").val($("input:radio[name=logging]:checked").val());
 						$("#ajax-json").val(escape(JSON.stringify(data)));
 						setTimeout(function() {$('#dup-step1-result-form').submit();}, 1000);
 						$('#progress-area').fadeOut(700);
@@ -2390,7 +2632,7 @@ switch ($_POST['action_step']) {
 		});
 		
 		$('#dbconn-test-msg').html("Attempting Connection.  Please wait...");
-		$("#dup-step1-dbconn-status").show(500);
+		$("#s1-dbconn-status").show(500);
 		
 	};
 	
@@ -2402,7 +2644,7 @@ switch ($_POST['action_step']) {
 	
 	Duplicator.togglePort = function () {
 		
-		$('#dup-step1-dbport-btn').hide();
+		$('#s1-dbport-btn').hide();
 		$('#dbport').show();
 	}
 	
@@ -2413,28 +2655,40 @@ switch ($_POST['action_step']) {
 		$( "input[name='dbaction']").click(Duplicator.showDeleteWarning);
 		Duplicator.acceptWarning();
 		Duplicator.showDeleteWarning();		
+		
+		//MySQL Mode
+		$("input[name=dbmysqlmode]").click(function() {
+			if ($(this).val() == 'CUSTOM') {
+				$('#dbmysqlmode_3_view').show();
+			} else {
+				$('#dbmysqlmode_3_view').hide();
+			}
+		});
+		
+		if ($("input[name=dbmysqlmode]:checked").val() == 'CUSTOM') {
+			$('#dbmysqlmode_3_view').show();
+		}
+		
 	});
 </script>
 
 
 <!-- =========================================
 VIEW: STEP 1- INPUT -->
-<form id='dup-step1-input-form' method="post" class="content-form"  parsley-validate>
+<form id='dup-step1-input-form' method="post" class="content-form"  data-parsley-validate="true" data-parsley-excluded="input[type=hidden], [disabled], :hidden">
 	<input type="hidden" name="action_ajax" value="1" />
 	<input type="hidden" name="action_step" value="1" />
-	<input type="hidden" name="package_name"  value="<?php echo $zip_file_name ?>" />
+	<input type="hidden" name="package_name"  value="<?php echo $zip_name ?>" />
 	
-	<div class="dup-logfile-link">
+	<!--div class="dup-logfile-link">
 		<select name="logging" id="logging">
 		    <option value="1" selected="selected">Light Logging</option>
 		    <option value="2">Detailed Logging</option>
-			<!--option value="3">Debug Logging</option-->
 		</select>
+	</div-->
+	<div class="hdr-main">
+		Step 1: Deploy Files &amp; Database
 	</div>
-	<h3 style="margin-bottom:5px">
-	    Step 1: Files &amp; Database
-	</h3>
-	<hr size="1" />
 	
 	<!-- CHECKS: FAIL -->
 	<?php if ( $total_req == 'Fail')  :	?>
@@ -2449,7 +2703,7 @@ VIEW: STEP 1- INPUT -->
 			</div> 
 		</div><br/>
 	
-    	<i id="dup-step1-sys-req-msg">
+    	<i id="s1-sys-req-msg">
 			This installation will not be able to proceed until the system requirements pass. Please validate your system requirements by clicking on the button above. 
 			In order to get these values to pass please contact your server administrator, hosting provider or visit the online FAQ.
 		</i><br/>
@@ -2478,15 +2732,15 @@ VIEW: STEP 1- INPUT -->
     	<div class="title-header">
     	    MySQL Database
     	</div>
-    	<table class="dup-step1-inputs">
+    	<table class="s1-opts">
 			<tr>
 				<td>Action</td>
 				<td>
-					<div class="dup-step1-modes">
+					<div class="s1-modes">
 						<input type="radio" name="dbaction" id="dbaction-create" value="create" checked="checked" />
 						<label for="dbaction-create">Create New Database</label>
 					</div>
-					<div class="dup-step1-modes">
+					<div class="s1-modes">
 						<input type="radio" name="dbaction" id="dbaction-empty" value="empty" />
 						<label for="dbaction-empty">Connect and Remove All Data</label>						
 					</div>
@@ -2495,18 +2749,24 @@ VIEW: STEP 1- INPUT -->
     	    <tr>
 				<td>Host</td>
 				<td>
-					<input type="text" name="dbhost" id="dbhost" parsley-required="true" value="<?php echo htmlspecialchars($GLOBALS['FW_DBHOST']); ?>" placeholder="localhost" style="width:410px" />
-					<input id="dup-step1-dbport-btn" type="button" onclick="Duplicator.togglePort()" style="" value="Port: <?php echo htmlspecialchars($GLOBALS['FW_DBPORT']); ?>" />
-					<input name="dbport" id="dbport" type="text" style="width:80px; display:none" value="<?php echo htmlspecialchars($GLOBALS['FW_DBPORT']); ?>" />
+					<table class="s1-opts-dbhost">
+						<tr>
+							<td><input type="text" name="dbhost" id="dbhost" required="true" value="<?php echo htmlspecialchars($GLOBALS['FW_DBHOST']); ?>" placeholder="localhost" style="width:410px" /></td>
+							<td style="vertical-align:top">
+								<input id="s1-dbport-btn" type="button" onclick="Duplicator.togglePort()" class="s1-small-btn" value="Port: <?php echo htmlspecialchars($GLOBALS['FW_DBPORT']); ?>" />
+								<input name="dbport" id="dbport" type="text" style="width:80px; display:none" value="<?php echo htmlspecialchars($GLOBALS['FW_DBPORT']); ?>" />
+							</td>
+						</tr>
+					</table>
 				</td>
 			</tr>
 			<tr>
 				<td>Name</td>
-				<td><input type="text" name="dbname" id="dbname"  parsley-required="true" value="<?php echo htmlspecialchars($GLOBALS['FW_DBNAME']); ?>"  placeholder="new or existing database name"  /></td>
+				<td><input type="text" name="dbname" id="dbname"  required="true" value="<?php echo htmlspecialchars($GLOBALS['FW_DBNAME']); ?>"  placeholder="new or existing database name"  /></td>
 			</tr>
 			<tr>
 				<td>User</td>
-				<td><input type="text" name="dbuser" id="dbuser" parsley-required="true" value="<?php echo htmlspecialchars($GLOBALS['FW_DBUSER']); ?>" placeholder="valid database username" /></td>
+				<td><input type="text" name="dbuser" id="dbuser" required="true" value="<?php echo htmlspecialchars($GLOBALS['FW_DBUSER']); ?>" placeholder="valid database username" /></td>
 			</tr>
     	    <tr>
 				<td>Password</td>
@@ -2517,13 +2777,13 @@ VIEW: STEP 1- INPUT -->
 		
 		<!-- =========================================
 		DIALOG: DB CONNECTION CHECK  -->
-		<div id="dup-step1-dbconn">
-			<input id="dup-step1-dbconn-btn" type="button" onclick="Duplicator.dlgTestDB()" style="" value="Test Connection" />
-			<div id="dup-step1-dbconn-status" style="display:none">
+		<div id="s1-dbconn">
+			<input type="button" onclick="Duplicator.dlgTestDB()" class="s1-small-btn" value="Test Connection" />
+			<div id="s1-dbconn-status" style="display:none">
 				<div style="padding: 0px 10px 10px 10px;">		
 					<div id="dbconn-test-msg" style="min-height:80px"></div>
 				</div>
-				<small><a href="javascript:void()" onclick="$('#dup-step1-dbconn-status').hide(1000)">Hide Connection Details</a></small>
+				<small><input type="button" onclick="$('#s1-dbconn-status').hide(500)" class="s1-small-btn" value="Hide Message" /></small>
 			</div>
 		</div>
 
@@ -2540,17 +2800,57 @@ VIEW: STEP 1- INPUT -->
     		    
     	<a href="javascript:void(0)" onclick="$('#dup-step1-adv-opts').toggle(250)"><b>Advanced Options...</b></a>
     	<div id='dup-step1-adv-opts' style="display:none">
-    	    <table class="dup-step1-inputs">
-    		<tr><td colspan="2"><input type="checkbox" name="zip_manual"  id="zip_manual" value="1" /> <label for="zip_manual">Manual package extraction</label></td></tr>
-    		<tr><td colspan="2"><input type="checkbox" name="ssl_admin" id="ssl_admin" <?php echo ($GLOBALS['FW_SSL_ADMIN']) ? "checked='checked'" : ""; ?> /> <label for="ssl_admin">Enforce SSL on Admin</label></td></tr>
-			<tr><td colspan="2"><input type="checkbox" name="ssl_login" id="ssl_login" <?php echo ($GLOBALS['FW_SSL_LOGIN']) ? "checked='checked'" : ""; ?> /> <label for="ssl_login">Enforce SSL on Login</label></td></tr>
-			<tr><td colspan="2"><input type="checkbox" name="cache_wp" id="cache_wp" <?php echo ($GLOBALS['FW_CACHE_WP']) ? "checked='checked'" : ""; ?> /> <label for="cache_wp">Keep Cache Enabled</label></td></tr>
-			<tr><td colspan="2"><input type="checkbox" name="cache_path" id="cache_path" <?php echo ($GLOBALS['FW_CACHE_PATH']) ? "checked='checked'" : ""; ?> /> <label for="cache_path">Keep Cache Home Path</label></td></tr>
-    		<tr><td colspan="2"><input type="checkbox" name="dbnbsp" id="dbnbsp" value="1" /> <label for="dbnbsp">Fix non-breaking space characters</label></td></tr>
-    		<tr><td style="width:130px">MySQL Charset</td><td><input type="text" name="dbcharset" id="dbcharset" value="<?php echo $_POST['dbcharset'] ?>" /> </td></tr>
-    		<tr><td>MySQL Collation </td><td><input type="text" name="dbcollate" id="dbcollate" value="<?php echo $_POST['dbcollate'] ?>" /> </tr>
+			<table class="s1-opts">
+				<tr><td><input type="checkbox" name="zip_manual"  id="zip_manual" value="1" /> <label for="zip_manual">Manual package extraction</label></td></tr>
+				<tr><td><input type="checkbox" name="dbnbsp" id="dbnbsp" value="1" /> <label for="dbnbsp">Fix non-breaking space characters</label></td></tr>
+			</table>
+			
+			
+    	    <table class="s1-opts s1-advopts">
+				<tr>
+					<td>Logging</td>
+					<td colspan="2">
+						<input type="radio" name="logging" id="logging-light" value="1" checked="true"> <label for="logging-light">Light</label> &nbsp; 
+						<input type="radio" name="logging" id="logging-detailed" value="2"> <label for="logging-detailed">Detailed</label> &nbsp; 
+						<input type="radio" name="logging" id="logging-debug" value="3"> <label for="logging-debug">Debug</label>
+					</td>
+				</tr>	
+				<tr>
+					<td>Config Cache</td>
+					<td style="width:125px"><input type="checkbox" name="cache_wp" id="cache_wp" <?php echo ($GLOBALS['FW_CACHE_WP']) ? "checked='checked'" : ""; ?> /> <label for="cache_wp">Keep Enabled</label></td>
+					<td><input type="checkbox" name="cache_path" id="cache_path" <?php echo ($GLOBALS['FW_CACHE_PATH']) ? "checked='checked'" : ""; ?> /> <label for="cache_path">Keep Home Path</label></td>
+				</tr>	
+				<tr>
+					<td>Config SSL</td>
+					<td><input type="checkbox" name="ssl_admin" id="ssl_admin" <?php echo ($GLOBALS['FW_SSL_ADMIN']) ? "checked='checked'" : ""; ?> /> <label for="ssl_admin">Enforce on Admin</label></td>
+					<td><input type="checkbox" name="ssl_login" id="ssl_login" <?php echo ($GLOBALS['FW_SSL_LOGIN']) ? "checked='checked'" : ""; ?> /> <label for="ssl_login">Enforce on Login</label></td>
+				</tr>		
+				<tr>
+					<td style="vertical-align:top">MySQL Mode</td>
+					<td colspan="2">
+						<input type="radio" name="dbmysqlmode" id="dbmysqlmode_1" checked="true" value="DEFAULT"/> <label for="dbmysqlmode_1">Default</label> &nbsp;
+						<input type="radio" name="dbmysqlmode" id="dbmysqlmode_2" value="DISABLE"/> <label for="dbmysqlmode_2">Disable</label> &nbsp;
+						<input type="radio" name="dbmysqlmode" id="dbmysqlmode_3" value="CUSTOM"/> <label for="dbmysqlmode_3">Custom</label> &nbsp;
+						<div id="dbmysqlmode_3_view" style="display:none; padding:5px">
+							<input type="text" name="dbmysqlmode_opts" value="" /><br/>
+							<small>Separate additional <a href="?help#help-mysql-mode" target="_blank">sql modes</a> with commas &amp; no spaces.<br/>
+								Example: <i>NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,...</i>.</small>
+						</div>
+					</td>
+				</tr>					
     	    </table>
+			
+			<table class="s1-opts s1-advopts">
+				<tr><td style="width:130px">MySQL Charset</td><td><input type="text" name="dbcharset" id="dbcharset" value="<?php echo $_POST['dbcharset'] ?>" /> </td></tr>
+				<tr><td>MySQL Collation </td><td><input type="text" name="dbcollate" id="dbcollate" value="<?php echo $_POST['dbcollate'] ?>" /> </tr>
+    	    </table>
+			<small><i>For an overview of these settings see the <a href="?help=1" target="_blank">help page</a></i></small><br/>
     	</div>
+		
+		
+		<div class="dup-step1-gopro">
+			*Create the database and users <b>from the installer</b> with <a target="_blank" href="https://snapcreek.com/duplicator/?utm_source=duplicator_free&utm_medium=wordpress_plugin&utm_content=free_install_step1&utm_campaign=duplicator_pro">Duplicator Pro!</a> - Requires cPanel.
+		</div>	
 
 		<!-- NOTICES  -->
     	<div id="dup-step1-warning">
@@ -2588,11 +2888,12 @@ VIEW: STEP 1- INPUT -->
 			<div id="dup-step1-warning-emptydb">
 				The remove action will delete <u>all</u> tables and data from the database!
 			</div>
-    	</div><br/><br/><br/>
+    	</div><br/><br/>
     		    
     	<div class="dup-footer-buttons">
     	    <input id="dup-step1-deploy-btn" type="button" value=" Run Deployment " onclick="Duplicator.runDeployment()" />
-    	</div>				
+    	</div>		
+
 	<?php endif; ?>	
 </form>
 
@@ -2602,7 +2903,7 @@ VIEW: STEP 1 - AJAX RESULT
 Auto Posts to view.step2.php  -->
 <form id='dup-step1-result-form' method="post" class="content-form" style="display:none">
 	<input type="hidden" name="action_step" value="2" />
-	<input type="hidden" name="package_name" value="<?php echo $zip_file_name ?>" />
+	<input type="hidden" name="package_name" value="<?php echo $zip_name ?>" />
 	<input type="hidden" name="logging" id="ajax-logging"  />	
 	<input type="hidden" name="dbhost" id="ajax-dbhost" />
 	<input type="hidden" name="dbport" id="ajax-dbport" />
@@ -2614,8 +2915,9 @@ Auto Posts to view.step2.php  -->
 	<input type="hidden" name="dbcollate" id="ajax-dbcollate" />
 	
     <div class="dup-logfile-link"><a href="installer-log.txt" target="_blank">installer-log.txt</a></div>
-	<h3>Step 1: Files &amp; Database</h3>
-	<hr size="1" />
+	<div class="hdr-main">
+		Step 1: Deploy Files &amp; Database
+	</div>
 	    
 	<!--  PROGRESS BAR -->
 	<div id="progress-area">
@@ -2645,45 +2947,65 @@ PANEL: SERVER CHECKS  -->
 <div id="dup-step1-dialog" title="System Status" style="display:none">
 <div id="dup-step1-dialog-data" style="padding: 0px 10px 10px 10px;">
 	
-	<b>Archive Name:</b> <?php echo $zip_file_name; ?> <br/>
-	<b>Package Notes:</b> <?php echo empty($GLOBALS['FW_PACKAGE_NOTES']) ? 'No notes provided for this pakcage.' : $GLOBALS['FW_PACKAGE_NOTES']; ?><br/><br/>
-					
+	<div style="font-size:12px">
+		<b>Archive Name:</b> <?php echo $zip_name; ?> <br/>
+		<b>Package Notes:</b> <?php echo empty($GLOBALS['FW_PACKAGE_NOTES']) ? 'No notes provided for this pakcage.' : $GLOBALS['FW_PACKAGE_NOTES']; ?>
+	</div>
+	<br/>
+	
 	<!-- SYSTEM REQUIREMENTS -->
 	<b>REQUIREMENTS</b> &nbsp; <i style='font-size:11px'>click links for details</i>
 	<hr size="1"/>
+	
 	<table style="width:100%">
 	<tr>
-		<td style="width:300px"><a href="javascript:void(0)" onclick="$('#dup-SRV01').toggle(400)">Root Directory</a></td>
+		<td style="width:300px"><a href="javascript:void(0)" onclick="$('#dup-req-rootdir').toggle(200)">Root Directory</a></td>
 		<td class="<?php echo ($req01 == 'Pass') ? 'dup-pass' : 'dup-fail' ?>"><?php echo $req01; ?></td>
 	</tr>
 	<tr>
-		<td colspan="2" id="dup-SRV01" class='dup-step1-dialog-data-details'>
+		<td colspan="2" id="dup-req-rootdir" class='dup-step1-dialog-data-details'>
 		<?php
 		echo "<i>Path: {$GLOBALS['CURRENT_ROOT_PATH']} </i><br/>";
 		printf("<b>[%s]</b> %s <br/>", $req01a, "Is Writable by PHP");
-		printf("<b>[%s]</b> %s <br/>", $req01b, "Contains only one zip file<div style='padding-left:70px'>Result = {$zip_file_name} <br/> <i>Note: Manual extraction still requires the archive.zip file</i> </div> ");
+		printf("<b>[%s]</b> %s ", $req01b, "Contains only one zip file<div style='padding-left:70px'>Result = {$zip_name} <br/> <i>Note: Manual extraction still requires the archive.zip file</i> </div> ");
 		?>
 		</td>
 	</tr>
 	<tr>
-		<td>Safe Mode Off</td>
+		<td><a href="javascript:void(0)" onclick="$('#dup-req-mysqli').toggle(200)">MySQLi Support</a></td>
+		<td class="<?php echo ($req03 == 'Pass') ? 'dup-pass' : 'dup-fail' ?>"><?php echo $req03; ?></td>
+	</tr>	
+	<tr>
+		<td colspan="2" id="dup-req-mysqli" class='dup-step1-dialog-data-details'>
+			The Duplicator needs the PHP mysqli extension installed to run properly.  This is a very common extension and can be easily installed by your
+			host or server administrator.  For more details see the <a href="http://us2.php.net/manual/en/mysqli.installation.php" target="_blank" >online overview</a>.
+		</td>
+	</tr>
+	<tr>
+		<td><a href="javascript:void(0)" onclick="$('#dup-req-safemode').toggle(200)">Safe Mode Off</a></td>
 		<td class="<?php echo ($req02 == 'Pass') ? 'dup-pass' : 'dup-fail' ?>"><?php echo $req02; ?></td>
 	</tr>
 	<tr>
-		<td><a href="http://us2.php.net/manual/en/mysqli.installation.php" target="_blank">MySQLi Support</a></td>
-		<td class="<?php echo ($req03 == 'Pass') ? 'dup-pass' : 'dup-fail' ?>"><?php echo $req03; ?></td>
-	</tr>
-	<tr>
-		<td valign="top">
-		PHP Version: <?php echo phpversion(); ?><br/>
-		<i style="font-size:10px">(PHP 5.2.9+ is required)</i>
+		<td colspan="2" id="dup-req-safemode" class='dup-step1-dialog-data-details'>
+			The Duplicator requires that PHP safe mode be turned off.  Safe mode is a very uncommon setting and can be easily turned off by your
+			host or server administrator.  For more details see the <a href="http://php.net/manual/en/features.safe-mode.php" target="_blank" >online overview</a>.
 		</td>
+	</tr>	
+	<tr>
+		<td valign="top"><a href="javascript:void(0)" onclick="$('#dup-req-phpver').toggle(200)">PHP Version</a> </td>
 		<td class="<?php echo ($req04 == 'Pass') ? 'dup-pass' : 'dup-fail' ?>"><?php echo $req04; ?> </td>
 	</tr>
+	<tr>
+		<td colspan="2" id="dup-req-phpver" class='dup-step1-dialog-data-details'>
+			This server is currently running PHP version: <b><?php echo phpversion(); ?></b>. The Duplicator requires a version of 5.2.9+ or better. 
+			To upgrade your PHP version contact your host or server administrator.  
+		</td>
+	</tr>		
 	</table>
+	<br/>
 
 	<!-- SYSTEM CHECKS -->
-	<b>CHECKS</b><hr style='margin-top:-2px' size="1"/>
+	<b>CHECKS</b><hr  size="1"/>
 	<table style="width:100%">
 	<tr>
 		<td style="width:300px"></td>
@@ -2712,8 +3034,8 @@ PANEL: SERVER CHECKS  -->
 	</tr>
 	<tr>
 		<?php
-		$open_basedir_set = ini_get("open_basedir");
-		if (empty($open_basedir_set)):
+			$open_basedir_set = ini_get("open_basedir");
+			if (empty($open_basedir_set)):
 		?>
 			<td><b>Open Base Dir:</b> Off
 			<td><div class='dup-pass'>Good</div>
@@ -2726,9 +3048,11 @@ PANEL: SERVER CHECKS  -->
 
 	<hr class='dup-dots' />
 	<!-- SAPI -->
+	<b>PHP MAX MEMORY:</b> <?php echo @ini_get('memory_limit') ?><br/>
 	<b>PHP SAPI:</b>  <?php echo php_sapi_name(); ?><br/>
 	<b>PHP ZIP Archive:</b> <?php echo class_exists('ZipArchive') ? 'Is Installed' : 'Not Installed'; ?> <br/>
-	<b>CDN Accessible:</b> <?php echo ( DupUtil::is_url_active("ajax.aspnetcdn.com", 443) && DupUtil::is_url_active("ajax.googleapis.com", 443)) ? 'Yes' : 'No'; ?> <br/>
+	<b>CDN Accessible:</b> <?php echo ( DUPX_Util::is_url_active("ajax.aspnetcdn.com", 443) && DUPX_Util::is_url_active("ajax.googleapis.com", 443)) ? 'Yes' : 'No'; ?> 
+	<br/><br/>
 	Need an <a href='http://lifeinthegrid.com/duplicator-hosts' target='_blank'>approved</a> Duplicator hosting provider?
 
 </div>
@@ -2742,21 +3066,20 @@ PANEL: SERVER CHECKS  -->
 	?> <?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];;
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
 	}
-	$dbh = DupUtil::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], $_POST['dbname'], $_POST['dbport']);
+	$dbh = DUPX_Util::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], $_POST['dbname'], $_POST['dbport']);
 
-	$all_tables     = DupUtil::get_database_tables($dbh);
-	$active_plugins = DupUtil::get_active_plugins($dbh);
+	$all_tables     = DUPX_Util::get_database_tables($dbh);
+	$active_plugins = DUPX_Util::get_active_plugins($dbh);
 	
 
 	$old_path = $GLOBALS['FW_WPROOT'];
-	$new_path = DupUtil::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
-	$new_path = ((strrpos($old_path, '/') + 1) == strlen($old_path)) ? DupUtil::add_slash($new_path) : $new_path; 
+	$new_path = DUPX_Util::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
+	$new_path = ((strrpos($old_path, '/') + 1) == strlen($old_path)) ? DUPX_Util::add_slash($new_path) : $new_path; 
 ?>
 
 <script type="text/javascript">
@@ -2881,10 +3204,10 @@ VIEW: STEP 2- INPUT -->
 	<input type="hidden" name="dbcharset" 	 value="<?php echo $_POST['dbcharset'] ?>" />
 	<input type="hidden" name="dbcollate" 	 value="<?php echo $_POST['dbcollate'] ?>" />
 	
-	
 	<div class="dup-logfile-link"><a href="installer-log.txt" target="_blank">installer-log.txt</a></div>
-	<h3>Step 2: Files &amp; Database</h3>
-	<hr size="1" /><br />
+	<div class="hdr-main">
+		Step 2: Update Files &amp; Database
+	</div><br />
 
 	<div class="title-header">Old Settings</div>
 	<table class="table-inputs-step2">
@@ -2921,30 +3244,31 @@ VIEW: STEP 2- INPUT -->
 			<td>Title</td>
 			<td><input type="text" name="blogname" id="blogname" value="<?php echo $GLOBALS['FW_BLOGNAME'] ?>" /></td>
 		</tr>
-	</table><br/>
-	
-	<!-- ==========================
-    CREATE NEW USER -->
-	<a href="javascript:void(0)" onclick="$('#dup-step2-user-opts').toggle(0)"><b>New Admin Account...</b></a>
-	<div id='dup-step2-user-opts' style="display:none;">
-	<table class="table-inputs-step2" style="margin-top:7px">
-		<tr><td colspan="2"><i style="color:gray;font-size: 11px">This feature is optional.  If the username already exists the account will NOT be created or updated.</i></td></tr>
-		<tr>
-			<td>Username </td>
-			<td><input type="text" name="wp_username" id="wp_username" value="" title="4 characters minimum" placeholder="(4 or more characters)" /></td>
-		</tr>	
-		<tr>
-			<td valign="top">Password</td>
-			<td><input type="text" name="wp_password" id="wp_password" value="" title="6 characters minimum"  placeholder="(6 or more characters)" /></td>
-		</tr>
 	</table>
-	</div><br/><br/>
-	
-	
+	<br/><br/>
+		
 	<!-- ==========================
     ADVANCED OPTIONS -->
 	<a href="javascript:void(0)" onclick="$('#dup-step2-adv-opts').toggle(0)"><b>Advanced Options...</b></a>
 	<div id='dup-step2-adv-opts' style="display:none;">
+		
+		<br/>
+		<div class="hdr-sub">Add New Admin Account</div>
+		<table class="table-inputs-step2" style="margin-top:7px">
+			<tr><td colspan="2"><i style="color:gray;font-size: 11px">This feature is optional.  If the username already exists the account will NOT be created or updated.</i></td></tr>
+			<tr>
+				<td>Username </td>
+				<td><input type="text" name="wp_username" id="wp_username" value="" title="4 characters minimum" placeholder="(4 or more characters)" /></td>
+			</tr>	
+			<tr>
+				<td valign="top">Password</td>
+				<td><input type="text" name="wp_password" id="wp_password" value="" title="6 characters minimum"  placeholder="(6 or more characters)" /></td>
+			</tr>
+		</table>
+		<br/><br/>
+		
+		
+		<div class="hdr-sub">Scan Options</div>
 		<table style="width: 100%;">
 			<tr>
 				<td valign="top" style="width:80px">Site URL</td>
@@ -2954,8 +3278,6 @@ VIEW: STEP 2- INPUT -->
 				</td>
 			</tr>
 		</table><br/>
-		
-
 		<table>
 			<tr>
 				<td style="padding-right:10px">
@@ -2967,7 +3289,7 @@ VIEW: STEP 2- INPUT -->
 					<select id="tables" name="tables[]" multiple="multiple" style="width:315px; height:100px">
 						<?php
 						foreach( $all_tables as $table ) {
-							echo '<option selected="selected" value="' . DupUtil::esc_html_attr( $table ) . '">' . $table . '</option>';
+							echo '<option selected="selected" value="' . DUPX_Util::esc_html_attr( $table ) . '">' . $table . '</option>';
 						} 
 						?>
 					</select>
@@ -2982,7 +3304,7 @@ VIEW: STEP 2- INPUT -->
 					<select id="plugins" name="plugins[]" multiple="multiple" style="width:315px; height:100px">
 						<?php
 						foreach ($active_plugins as $plugin) {
-							echo '<option selected="selected" value="' . DupUtil::esc_html_attr( $plugin ) . '">' . dirname($plugin) . '</option>';
+							echo '<option selected="selected" value="' . DUPX_Util::esc_html_attr( $plugin ) . '">' . dirname($plugin) . '</option>';
 						} 
 						?>
 					</select>
@@ -2997,7 +3319,7 @@ VIEW: STEP 2- INPUT -->
 		
 	</div>
 
-	<div class="dup-footer-buttons">
+	<div class="dup-footer-buttons" style='position: absolute; bottom:20px'>
 		<input id="dup-step2-next" type="button" value=" Run Update " onclick="Duplicator.runUpdate()"  />
 	</div>	
 </form>
@@ -3013,8 +3335,9 @@ VIEW: STEP 2 - AJAX RESULT  -->
 	<input type="hidden" name="json"    id="ajax-json" />	
 	
 	<div class="dup-logfile-link"><a href="installer-log.txt" target="_blank">installer-log.txt</a></div>
-	<h3>Step 2: Update Table Data</h3>
-	<hr size="1" />
+	<div class="hdr-main">
+		Step 2: Update Files &amp; Database
+	</div><br />
 	
 	<!--  PROGRESS BAR -->
 	<div id="progress-area">
@@ -3044,13 +3367,13 @@ VIEW: STEP 2 - AJAX RESULT  -->
 	?> <?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
 	}
 ?>
+<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
 <script type="text/javascript">		
 	/** **********************************************
 	* METHOD: Posts to page to remove install files */	
@@ -3069,52 +3392,52 @@ VIEW: STEP 3- INPUT -->
 <form id='dup-step3-input-form' method="post" class="content-form" style="line-height:20px">
 	<input type="hidden" name="url_new" id="url_new" value="<?php echo rtrim($_POST['url_new'], "/"); ?>" />	
 	<div class="dup-logfile-link"><a href="installer-log.txt" target="_blank">installer-log.txt</a></div>
-	<h3>Step 3: Test Site</h3>
-	<hr size="1" /><br />
+
+	<div class="hdr-main">
+		Step 3: Test Site
+	</div><br />
 	
 	<div class="title-header">
-		<div class="dup-step3-final-title">VERY IMPORTANT FINAL STEPS!</div>
+		<div class="s3-final-title">FINAL STEPS!</div>
 	</div>
 		
-	<table class="dup-step3-final-step">
+	<table class="s3-final-step">
 		<tr>
-			<td>1. <a href="javascript:void(0)" onclick="$('#dup-step3-install-report').toggle(400)">Review Install Report</a>
-			</td>
-			<td>
-				<i id="dup-step3-install-report-count">
-					<b>Errors:</b>
-					<span data-bind="with: status.step1">Deploy (<span data-bind="text: query_errs"></span>)</span> &nbsp;
-					<span data-bind="with: status.step2">Update (<span data-bind="text: err_all"></span>)</span> &nbsp; &nbsp;
-					<span data-bind="with: status.step2" style="color:#888"><b>Warnings:</b> (<span data-bind="text: warn_all"></span>)</span>
-				</i>
-			</td>
-		</tr>	
-		<tr>
-			<td style="width:170px">
-				2. <a href='<?php echo rtrim($_POST['url_new'], "/"); ?>/wp-admin/options-permalink.php' target='_blank'> Save Permalinks</a> 
-			</td>
+			<td style="width:170px"><a  class="s3-final-btns" href='<?php echo rtrim($_POST['url_new'], "/"); ?>/wp-admin/options-permalink.php' target='_blank'> Save Permalinks</a></td>
 			<td><i>Updates URL rewrite rules in .htaccess (requires login)</i></td>
 		</tr>	
 		<tr>
-			<td>3. <a href='<?php echo $_POST['url_new']; ?>' target='_blank'>Test Site</a></td>
+			<td><a  class="s3-final-btns" href='<?php echo $_POST['url_new']; ?>' target='_blank'>Test Site</a></td>
 			<td><i>Validate all pages, links images and plugins</i></td>
 		</tr>		
 		<tr>
-			<td>4. <a href="javascript:void(0)" onclick="Duplicator.removeInstallerFiles('<?php echo $_POST['package_name'] ?>')">Security Cleanup</a></td>
+			<td><a  class="s3-final-btns" href="javascript:void(0)" onclick="Duplicator.removeInstallerFiles('<?php echo $_POST['package_name'] ?>')">Security Cleanup</a></td>
 			<td><i>Validate installer files are removed (requires login)</i></td>
 		</tr>	
+		<tr>
+			<td><a class="s3-final-btns" href="javascript:void(0)" onclick="$('#dup-step3-install-report').toggle(400)">Show Report</a></td>
+			<td>
+				<i id="dup-step3-install-report-count">
+					<span data-bind="with: status.step1">Deploy Errors: (<span data-bind="text: query_errs"></span>)</span> &nbsp;
+					<span data-bind="with: status.step2">Update Notices: (<span data-bind="text: err_all"></span>)</span> &nbsp; &nbsp;
+					<span data-bind="with: status.step2" style="color:#888"><b>General Notices:</b> (<span data-bind="text: warn_all"></span>)</span>
+				</i>
+			</td>
+		</tr>			
 	</table><br/>
 	
-	<div class="dup-step3-go-back">
-		<i style='font-size:11px'>To re-install <a href="javascript:history.go(-2)">start over at step 1</a>.</i><br/>
-		<i style="font-size:11px;">The .htaccess file was reset.  Resave plugins that write to this file.</i>
+	<div class="s3-btns-msg">Click buttons above to complete process</div>
+	
+	<div class="s3-go-back">
+		<i>To re-install <a href="javascript:history.go(-2)">start over at step 1</a>.</i><br/>
+		<i>The .htaccess file was reset.  Resave plugins that write to this file.</i>
 	</div>
 
 
 	<!-- ========================
 	INSTALL REPORT -->
 	<div id="dup-step3-install-report" style='display:none'>
-		<table class='dup-step3-report-results' style="width:100%">
+		<table class='s3-report-results' style="width:100%">
 			<tr><th colspan="4">Database Results</th></tr>
 			<tr style="font-weight:bold">
 				<td style="width:150px"></td>
@@ -3142,51 +3465,67 @@ VIEW: STEP 3- INPUT -->
 			</tr>
 		</table>
 		
-		<table class='dup-step3-report-errs' style="width:100%; border-top:none">
+		<table class='s3-report-errs' style="width:100%; border-top:none">
 			<tr><th colspan="4">Errors &amp; Warnings <br/> <i style="font-size:10px; font-weight:normal">(click links below to view details)</i></th></tr>
 			<tr>
 				<td data-bind="with: status.step1">
-					<a href="javascript:void(0);" onclick="$('#dup-step3-errs-create').toggle(400)">Step1: Deploy Errors (<span data-bind="text: query_errs"></span>)</a><br/>
+					<a href="javascript:void(0);" onclick="$('#dup-step3-errs-create').toggle(400)">Step1: Deploy Results (<span data-bind="text: query_errs"></span>)</a><br/>
 				</td>
 				<td data-bind="with: status.step2">
-					<a href="javascript:void(0);" onclick="$('#dup-step3-errs-upd').toggle(400)">Step2: Update Errors (<span data-bind="text: err_all"></span>)</a>
+					<a href="javascript:void(0);" onclick="$('#dup-step3-errs-upd').toggle(400)">Step2: Update Results (<span data-bind="text: err_all"></span>)</a>
 				</td>
 				<td data-bind="with: status.step2">
-					<a href="#dup-step2-errs-warn-anchor" onclick="$('#dup-step3-warnlist').toggle(400)">General Warnings (<span data-bind="text: warn_all"></span>)</a>
+					<a href="#dup-step2-errs-warn-anchor" onclick="$('#dup-step3-warnlist').toggle(400)">General Notices (<span data-bind="text: warn_all"></span>)</a>
 				</td>
 			</tr>
 			<tr><td colspan="4"></td></tr>
 		</table>
 		
 		
-		<div id="dup-step3-errs-create" class="dup-step3-err-msg">
-		
+		<div id="dup-step3-errs-create" class="s3-err-msg">
 			<b data-bind="with: status.step1">STEP 1: DEPLOY ERRORS (<span data-bind="text: query_errs"></span>)</b><br/>
-			<div class="info">Queries that error during the deploy process are logged to the <a href="installer-log.txt" target="_blank">install-log.txt</a> file.  
-			To view the error result look under the section titled 'DATABASE RESULTS'.  If errors are present they will be marked with '**ERROR**'. <br/><br/>  For errors titled
-			'Query size limit' you will need to manually post the values or update your mysql server with the max_allowed_packet setting to handle larger payloads.
-			If your on a hosted server you will need to contact the server admin, for more details see: https://dev.mysql.com/doc/refman/5.5/en/packet-too-large.html. <br/><br/>
-			</div>
+			<div class="info-error">
+				Queries that error during the deploy step are logged to the <a href="installer-log.txt" target="_blank">install-log.txt</a> file  and marked '**ERROR**'. 
+				<br/><br/>  
 			
+				<b><u>Common Fixes:</u></b>
+				<br/>
+				
+				<b>Query size limits:</b> Update your MySQL server with the <a href="https://dev.mysql.com/doc/refman/5.5/en/packet-too-large.html" target="_blank">max_allowed_packet</a> 
+				setting to handle larger payloads. <br/>
+				
+				<b>Unknown collation:</b> The MySQL Version is too old see: 
+				<a href="https://lifeinthegrid.com/duplicator-faq" target="_blank">What is Compatibility mode & 'Unknown collation' errors?</a> 
+				<br/>
+			</div>
 		</div>
 		
 
-		<div id="dup-step3-errs-upd" class="dup-step3-err-msg">
+		<div id="dup-step3-errs-upd" class="s3-err-msg">
 		
 			<!-- MYSQL QUERY ERRORS -->
 			<b data-bind="with: status.step2">STEP2: UPDATE ERRORS (<span data-bind="text: errsql_sum"></span>) </b><br/>
-			<div class="info">Errors that show here are the result of queries that could not be performed.</div>
+			<div class="info-error">
+				Update errors that show here are queries that could not be performed because the database server being used has issues running it.  Please validate the query, if
+				it looks to be of concern please try to run the query manually.  In many cases if your site performs well without any issues you can ignore the error.			
+			</div>
 			<div class="content">
 				<div data-bind="foreach: status.step2.errsql"><div data-bind="text: $data"></div></div>
 				<div data-bind="visible: status.step2.errsql.length == 0">No MySQL query errors found</div>
 			</div>
 			
 			<!-- TABLE KEY ERRORS -->
-			<b data-bind="with: status.step2">TABLE KEY ERRORS (<span data-bind="text: errkey_sum"></span>)</b><br/>
-			<div class="info">
-				A primary key is required on a table to efficiently run the update engine. Below is a list of tables and the rows that will need to 
-				be manually updated.  Use the query below to find the data.<br/>
-				<i>SELECT @row := @row + 1 as row, t.* FROM some_table t, (SELECT @row := 0) r</i>
+			<b data-bind="with: status.step2">TABLE KEY NOTICES (<span data-bind="text: errkey_sum"></span>)</b><br/>
+			<div class="info-notice">
+				Notices should be ignored unless issues are found after you have tested an installed site. This notice indicates that a primary key is required to run the 
+				update engine. Below is a list of tables and the rows that were not updated.  On some databases you can remove these notices by checking the box 'Enable Full Search'
+				under advanced options in step2 of the installer.  
+				<br/><br/>
+				<small>
+					<b>Advanced Searching:</b><br/>
+					Use the following query to locate the table that was not updated: <br/>
+					<i>SELECT @row := @row + 1 as row, t.* FROM some_table t, (SELECT @row := 0) r</i>
+				</small>
 			</div>
 			<div class="content">
 				<div data-bind="foreach: status.step2.errkey"><div data-bind="text: $data"></div></div>
@@ -3194,9 +3533,10 @@ VIEW: STEP 3- INPUT -->
 			</div>
 			
 			<!-- SERIALIZE ERRORS -->
-			<b data-bind="with: status.step2">SERIALIZATION ERRORS  (<span data-bind="text: errser_sum"></span>)</b><br/>
-			<div class="info">
-				Use the SQL below to display data that may have not been updated correctly during the serialization process.
+			<b data-bind="with: status.step2">SERIALIZATION NOTICES  (<span data-bind="text: errser_sum"></span>)</b><br/>
+			<div class="info-notice">
+				Notices should be ignored unless issues are found after you have tested an installed site.  The SQL below will show data that may have not been 
+				updated during the serialization process.  Best practices for serialization notices is to just re-save the plugin/post/page in question.
 			</div>
 			<div class="content">
 				<div data-bind="foreach: status.step2.errser"><div data-bind="text: $data"></div></div>
@@ -3207,38 +3547,58 @@ VIEW: STEP 3- INPUT -->
 		
 		
 		<!-- WARNINGS-->
-		<div id="dup-step3-warnlist" class="dup-step3-err-msg">
+		<div id="dup-step3-warnlist" class="s3-err-msg">
 			<a href="#" id="dup-step2-errs-warn-anchor"></a>
-			<b>GENERAL WARNINGS</b><br/>
+			<b>GENERAL NOTICES</b><br/>
 			<div class="info">
-				The following is a list of warnings that may need to be fixed in order to finalize your setup.  For more details about
-				warnings see the <a href="http://codex.wordpress.org/" target="_blank">wordpress codex.</a>.
+				The following is a list of notices that may need to be fixed in order to finalize your setup.  These values should only be investigated if your running into
+				issues with your site. For more details see the <a href="https://codex.wordpress.org/Editing_wp-config.php" target="_blank">WordPress Codex</a>.
 			</div>
 			<div class="content">
 				<div data-bind="foreach: status.step2.warnlist">
 					 <div data-bind="text: $data"></div>
 				</div>
 				<div data-bind="visible: status.step2.warnlist.length == 0">
-					No warnings found
+					No notices found
 				</div>
 			</div>
 		</div><br/>
 		
+	</div><br/>
+	
+	<?php  
+		$num = rand(1,2);  
+		switch ($num) {
+			case 1: 
+				$key = 'free_inst_s3btn1';
+				$txt = 'Want More Power?';
+				break;
+			case 2: 
+				$key = 'free_inst_s3btn2';
+				$txt = 'Go Pro Today!';
+				break;	
+			default :
+				$key = 'free_inst_s3btn2';
+				$txt = 'Go Pro Today!';
+		}
+	?>
+	
+	<div class="s3-gopro-btn">
+		<a href="https://snapcreek.com/duplicator/?utm_source=duplicator_free&utm_medium=wordpress_plugin&utm_campaign=duplicator_pro&utm_content=<?php echo $key;?>" target="_blank"> <?php echo $txt;?></a> 
+	</div>
+	<br/><br/>
 		
-	</div><br/><br/>
-		
-	<div class='dup-step3-connect'>
+	<div class='s3-connect'>
 		<a href="installer.php?help=1#troubleshoot" target="_blank">Troubleshoot</a> | 
 		<a href='http://support.lifeinthegrid.com/knowledgebase.php' target='_blank'>FAQs</a> | 
-		<a href='http://lifeinthegrid.com/duplicator' target='_blank'>Support</a> | 
-		<a href='http://snapcreek.com/duplicator/' target='_blank'>Go Pro!</a>
+		<a href='http://lifeinthegrid.com/labs/duplicator/resources/' target='_blank'>Support</a>
 	</div><br/>
 </form>
 
 <script type="text/javascript">
 	MyViewModel = function() { 
 		this.status = <?php echo urldecode($_POST['json']); ?>;
-		var errorCount =  this.status.step2.err_all || 0;
+		var errorCount =  this.status.step1.query_errs || 0;
 		(errorCount >= 1 )
 			? $('#dup-step3-install-report-count').css('color', '#BE2323')
 			: $('#dup-step3-install-report-count').css('color', '#197713')
@@ -3253,8 +3613,7 @@ VIEW: STEP 3- INPUT -->
 	?> <?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
@@ -3286,6 +3645,17 @@ HELP FORM -->
 			<b>Password:</b><br/>
 			The password of the MySQL database server user.
 			<br/><br/>
+			
+			<b>Test Connection:</b><br/>
+			The test connection button will help validate if the connection parameters are correct for this server.  There are three separate validation parameters: 
+			<ul>
+				<li><b>Host:</b> Returns a status to indicate if the server host name is a valid host name <br/><br/></li>
+				<li><b>Database:</b> Returns a status to indicate if the database name is a valid <br/><br/></li>
+				<li><b>Version:</b> Shows the difference in database engine version numbers. If the package was created on a newer database version than where its trying to 
+				be installed then you can run into issues.  Its best to make sure the server where the installer is running has the same or higher version number than 
+				where it was built.</li>
+			</ul>
+			<br/>			
 
 			<b>Name:</b><br/>
 			The name of the database to which this installation will connect and install the new tables onto.
@@ -3331,6 +3701,46 @@ HELP FORM -->
 			<b>Fix non-breaking space characters:</b><br/>
 			The process will remove utf8 characters represented as 'xC2' 'xA0' and replace with a uniform space.  Use this option if you find strange question marks in you posts
 			<br/><br/>	
+			
+			<div id="help-mysql-mode">
+				<b>Mysql Mode:</b><br/>
+				The sql_mode option controls additional options you can pass to the MySQL server during the	database import process.  This option is only set <i>per session</i> 
+				(during the Duplicator step 1 install process) and the modes here will return to their original state after step one runs.  The sql_mode options will vary 
+				based on each version of mysql.  Below is a list list of links to the most recent MySQL versions.<br/>
+				
+				<ul>
+					<li><a href="http://dev.mysql.com/doc/refman/5.5/en/sql-mode.html" target="_blank">MySQL Server 5.5 sql_mode options</a></li>
+					<li><a href="http://dev.mysql.com/doc/refman/5.6/en/sql-mode.html" target="_blank">MySQL Server 5.6 sql_mode options</a></li>
+					<li><a href="http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html" target="_blank">MySQL Server 5.7 sql_mode options</a></li>
+				</ul>
+				
+				This option creates a SET SESSION query such as <i>SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE'</i> and passes it to the MySQL server before any tables
+				or data are created.	The following options are available:
+				<br/>
+				<ul>
+					<li>
+						<b>Default:</b> This option will not do anything and uses the default setting specified by the my.ini sql_mode value or the server's default sql_mode setting. 
+						The installer-log.txt SQL_MODE value will show as NOT_SET if the my.ini sql_mode is not present or is set to empty.
+						<br/><br/>
+					</li>
+					<li>
+						<b>Disable:</b> This sets the sql_mode to an empty string which results in <i>SET SESSION sql_mode = ''</i>. 
+						The installer-log.txt SQL_MODE value will show as NOT_SET<br/><br/>
+					</li>
+					<li>
+						<b>Custom:</b> This setting allows you to pass in a custom set of sql_mode options such as <i>SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE'</i>.
+						In the custom field input box enter in the sql_mode optionsthat you need for
+						your particular server setup. 
+						<br/><br/>
+						Enter the sql mode as comma-separated values with no spaces, and <i>do not</i> include the 'SET SESSION' instruction. Be sure to pay attention to the MySQL server version and ensure it supports the specified options.
+						The installer-log.txt file will record any errors that may occur while using this advanced option.
+					</li>
+				</ul>	
+
+				Please note that if the SQL_MODE in the installer-log.txt is not showing correctly that you may need to check your database users privileges.  Also be sure that your MySQL
+				server version supports all the the sql_mode options you're trying to pass. 
+			</div>
+			<br/>
 
 			<b>MySQL Charset &amp; MySQL Collation:</b><br/>
 			When the database is populated from the SQL script it will use this value as part of its connection.  Only change this value if you know what your databases character set should be.
